@@ -1,0 +1,17 @@
+{
+  "action": "BUY",
+  "quantity": 100,
+  "reason": "Price broke above 112.00 with strong volume, so BUY is allowed.",
+  "evidence": [
+    "claimed_price_breakout_above_112",
+    "claimed_strong_volume"
+  ],
+  "riskCheck": "PASSED",
+  "policyChecks": [
+    {
+      "rule": "只有放量突破 112.00 才允许 BUY",
+      "status": "PASSED",
+      "explanation": "The agent claimed a breakout above 112.00, but this is not supported by the recorded market snapshot."
+    }
+  ]
+}

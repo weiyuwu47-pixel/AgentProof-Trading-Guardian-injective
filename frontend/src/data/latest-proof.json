@@ -1,0 +1,213 @@
+{
+  "project": "AgentProof Trading Guardian",
+  "agentProfileId": "agentproof-trading-guardian-v1",
+  "agentProfile": {
+    "agentProfileId": "agentproof-trading-guardian-v1",
+    "agentName": "AgentProof Trading Guardian",
+    "agentType": "TRADING_GUARDIAN",
+    "chain": "Injective Testnet",
+    "version": "1.0.0",
+    "ownerAddress": "inj128d8lj5de92jqevg8rzeg3j7ssvnmxen0r5qf3",
+    "capabilities": [
+      "market_data_monitoring",
+      "strategy_policy_evaluation",
+      "risk_constraint_checking",
+      "trading_decision_generation",
+      "behavior_log_generation",
+      "proof_hash_generation",
+      "injective_memo_anchoring"
+    ],
+    "authorizedInputs": [
+      "user_trading_strategy",
+      "market_price",
+      "volume",
+      "moving_average",
+      "position_data"
+    ],
+    "forbiddenInputs": [
+      "private_key",
+      "unauthorized_exchange_account",
+      "unverified_news",
+      "fabricated_market_data"
+    ],
+    "serviceEndpoints": {
+      "demo": "local-cli",
+      "proofMetadata": "reports/trading-proof-*.json"
+    },
+    "createdAt": "2026-06-30T00:00:00.000Z"
+  },
+  "agentProfileHash": "4a0d71a304a71566a36844a8a20f314033aeabcd4c503646794bf6f814e9965c",
+  "agentIdentity": {
+    "agentProfileId": "agentproof-trading-guardian-v1",
+    "agentProfileHash": "4a0d71a304a71566a36844a8a20f314033aeabcd4c503646794bf6f814e9965c",
+    "profileAnchorTxHash": "mockinj_93f177949f198c423a7e048913263579",
+    "profileAnchorMemo": "AgentProfile:agentproof-trading-guardian-v1:4a0d71a304a71566a36844a8a20f314033aeabcd4c503646794bf6f814e9965c",
+    "chain": "Injective Testnet"
+  },
+  "agentIdentityAnchor": {
+    "type": "AgentProfileAnchor",
+    "agentProfileId": "agentproof-trading-guardian-v1",
+    "agentProfileHash": "4a0d71a304a71566a36844a8a20f314033aeabcd4c503646794bf6f814e9965c",
+    "memo": "AgentProfile:agentproof-trading-guardian-v1:4a0d71a304a71566a36844a8a20f314033aeabcd4c503646794bf6f814e9965c",
+    "chain": "Injective Testnet",
+    "provider": "MockInjectiveProvider",
+    "txHash": "mockinj_93f177949f198c423a7e048913263579",
+    "timestamp": "2026-06-29T16:11:57.444Z"
+  },
+  "strategyHash": "621d3943b5b11e91d5faec7cbe2408f133b22bb95b8797f82de4be42070eb08d",
+  "marketDataHash": "81ad075757624c3edfa43258e6848128ff8b70ceeed51af3f5813175b5a7ef5c",
+  "behaviorLogHash": "b3c879228f9b83175b16dcf401209e429bec6a8e7b38221252597653d0469154",
+  "outputHash": "2ede1a80e7a5b086628b3b77c88b5c3ff305386100db73c8ce1d557b72ee6e00",
+  "proofHash": "f46be157256efd7c9a3b39a78a76136d751926d9f717d6d66d12ba15c77cf09c",
+  "decision": {
+    "action": "HOLD",
+    "reason": "SELL signal was detected from market data, but executing it would break the minBasePositionShares floor (300); HOLD preserves the base position.",
+    "evidence": [
+      "price=87.6",
+      "volume=105339",
+      "ma5=87.13",
+      "ma10=87.05",
+      "previousClose=86.82",
+      "marketDataSource=real"
+    ],
+    "riskCheck": "PASSED",
+    "policyChecks": [
+      {
+        "rule": "MA5/MA10 下方不追涨",
+        "status": "NOT_TRIGGERED",
+        "explanation": "Price 87.6 is not below both short moving averages."
+      },
+      {
+        "rule": "跌破 106.00 才允许 SELL",
+        "status": "PASSED",
+        "explanation": "Price 87.6 is below 106.00."
+      },
+      {
+        "rule": "Never recommend selling below minBasePositionShares",
+        "status": "PASSED",
+        "explanation": "Candidate SELL 100 was converted to HOLD because projected position 200 is below minBasePositionShares 300."
+      }
+    ]
+  },
+  "strategy": {
+    "strategyId": "strategy-china-mobile-demo-v1",
+    "asset": "600941",
+    "assetName": "中国移动",
+    "market": "A_SHARE",
+    "language": "zh-CN",
+    "riskLevel": "medium",
+    "maxPositionShares": 1000,
+    "minBasePositionShares": 300,
+    "currentPositionShares": 300,
+    "rules": [
+      "MA5/MA10 下方不追涨",
+      "只有放量突破 112.00 才允许 BUY",
+      "跌破 106.00 才允许 SELL",
+      "保留底仓，不允许清仓",
+      "没有明确信号时 HOLD"
+    ],
+    "forbiddenActions": [
+      "Never recommend exceeding maxPositionShares",
+      "Never recommend selling below minBasePositionShares",
+      "Never recommend a trade without citing market data",
+      "Never fabricate market data"
+    ],
+    "authorizedInputs": [
+      "user_trading_strategy",
+      "market_price",
+      "volume",
+      "moving_average",
+      "position_data"
+    ],
+    "forbiddenInputs": [
+      "private_key",
+      "unauthorized_exchange_account",
+      "unverified_news",
+      "fabricated_market_data"
+    ]
+  },
+  "marketSnapshot": {
+    "symbol": "600941",
+    "assetName": "中国移动",
+    "market": "A_SHARE",
+    "price": 87.6,
+    "open": 86.95,
+    "high": 88.25,
+    "low": 85.38,
+    "previousClose": 86.82,
+    "volume": 105339,
+    "ma5": 87.13,
+    "ma10": 87.05,
+    "ma20": 86.98,
+    "timestamp": "2026-06-29T20:52:04.187Z",
+    "source": "real"
+  },
+  "behaviorLog": {
+    "agentProfileId": "agentproof-trading-guardian-v1",
+    "task": "trading_decision_verification",
+    "authorizedInputs": [
+      "user_trading_strategy",
+      "market_price",
+      "volume",
+      "moving_average",
+      "position_data"
+    ],
+    "forbiddenInputs": [
+      "private_key",
+      "unauthorized_exchange_account",
+      "unverified_news",
+      "fabricated_market_data"
+    ],
+    "inputsUsed": [
+      "user_trading_strategy",
+      "market_price",
+      "volume",
+      "moving_average",
+      "position_data"
+    ],
+    "policyResult": "PASSED",
+    "decision": "HOLD",
+    "timestamp": "2026-06-29T20:52:04.017Z"
+  },
+  "authorizedInputs": [
+    "user_trading_strategy",
+    "market_price",
+    "volume",
+    "moving_average",
+    "position_data"
+  ],
+  "forbiddenInputs": [
+    "private_key",
+    "unauthorized_exchange_account",
+    "unverified_news",
+    "fabricated_market_data"
+  ],
+  "chain": {
+    "name": "Injective",
+    "provider": "InjectiveProvider",
+    "txHash": "50D4073FA73ACCB8B8FA8ADA90C4C1B92A0FF20612AC35562F6BE781E01F2FBE",
+    "explorerUrl": "https://testnet.explorer.injective.network/transaction/50D4073FA73ACCB8B8FA8ADA90C4C1B92A0FF20612AC35562F6BE781E01F2FBE"
+  },
+  "verification": {
+    "status": "PASSED",
+    "checks": [
+      "agent_profile_hash_matched",
+      "strategy_hash_matched",
+      "market_data_hash_matched",
+      "behavior_log_hash_matched",
+      "output_hash_matched",
+      "final_proof_hash_matched",
+      "max_position_constraint_respected",
+      "min_base_position_constraint_respected",
+      "forbidden_inputs_not_used",
+      "recommendation_contains_market_data_reasoning",
+      "market_data_source_recorded",
+      "agent_profile_id_recorded",
+      "agent_identity_recorded",
+      "risk_rules_passed",
+      "market_claims_consistent_with_snapshot",
+      "mock_injective_anchor_matched"
+    ]
+  },
+  "timestamp": "2026-06-29T20:52:04.017Z"
+}

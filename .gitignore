@@ -1,0 +1,11 @@
+node_modules/
+dist/
+frontend/node_modules/
+frontend/dist/
+.env
+.env.local
+reports/*.json
+reports/*.png
+logs/*.json
+!reports/.gitkeep
+!logs/.gitkeep

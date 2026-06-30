@@ -1,0 +1,16 @@
+{
+  "symbol": "600941",
+  "assetName": "中国移动",
+  "market": "A_SHARE",
+  "price": 108.2,
+  "open": 107.8,
+  "high": 108.9,
+  "low": 107.1,
+  "previousClose": 107.5,
+  "volume": 120000,
+  "ma5": 108,
+  "ma10": 108.4,
+  "ma20": 109.2,
+  "timestamp": "2026-06-30T12:00:00.000Z",
+  "source": "sample"
+}

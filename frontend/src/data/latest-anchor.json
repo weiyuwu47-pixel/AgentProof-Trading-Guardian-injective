@@ -1,0 +1,9 @@
+{
+  "chain": "Injective Testnet",
+  "provider": "InjectiveProvider",
+  "txHash": "50D4073FA73ACCB8B8FA8ADA90C4C1B92A0FF20612AC35562F6BE781E01F2FBE",
+  "explorerUrl": "https://testnet.explorer.injective.network/transaction/50D4073FA73ACCB8B8FA8ADA90C4C1B92A0FF20612AC35562F6BE781E01F2FBE",
+  "memo": "AgentProof:f46be157256efd7c9a3b39a78a76136d751926d9f717d6d66d12ba15c77cf09c",
+  "proofHash": "f46be157256efd7c9a3b39a78a76136d751926d9f717d6d66d12ba15c77cf09c",
+  "timestamp": "2026-06-29T20:52:47.920Z"
+}

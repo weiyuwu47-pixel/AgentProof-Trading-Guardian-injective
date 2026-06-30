@@ -1,0 +1,37 @@
+{
+  "strategyId": "strategy-china-mobile-demo-v1",
+  "asset": "600941",
+  "assetName": "中国移动",
+  "market": "A_SHARE",
+  "language": "zh-CN",
+  "riskLevel": "medium",
+  "maxPositionShares": 1000,
+  "minBasePositionShares": 300,
+  "currentPositionShares": 300,
+  "rules": [
+    "MA5/MA10 下方不追涨",
+    "只有放量突破 112.00 才允许 BUY",
+    "跌破 106.00 才允许 SELL",
+    "保留底仓，不允许清仓",
+    "没有明确信号时 HOLD"
+  ],
+  "forbiddenActions": [
+    "Never recommend exceeding maxPositionShares",
+    "Never recommend selling below minBasePositionShares",
+    "Never recommend a trade without citing market data",
+    "Never fabricate market data"
+  ],
+  "authorizedInputs": [
+    "user_trading_strategy",
+    "market_price",
+    "volume",
+    "moving_average",
+    "position_data"
+  ],
+  "forbiddenInputs": [
+    "private_key",
+    "unauthorized_exchange_account",
+    "unverified_news",
+    "fabricated_market_data"
+  ]
+}

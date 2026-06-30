@@ -1,0 +1,36 @@
+{
+  "name": "agentproof-trading-guardian",
+  "version": "0.1.0",
+  "description": "Verifiable Decision Layer for AI Financial Agents on Injective.",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "demo:trading": "tsx scripts/demo-trading.ts",
+    "demo:hallucination": "tsx scripts/demo-hallucination.ts",
+    "verify:trading": "tsx scripts/verify-trading-proof.ts",
+    "anchor:injective": "tsx scripts/anchor-injective.ts",
+    "register:agent": "tsx scripts/register-agent.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "injective",
+    "ai-agent",
+    "proof",
+    "trading",
+    "web3"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@injectivelabs/networks": "^1.20.18",
+    "@injectivelabs/sdk-ts": "^1.20.18",
+    "@injectivelabs/ts-types": "^1.20.18",
+    "@injectivelabs/utils": "^1.20.18",
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

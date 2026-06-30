@@ -1,0 +1,11 @@
+{
+  "type": "AgentProfileAnchor",
+  "agentProfileId": "agentproof-trading-guardian-v1",
+  "agentProfileHash": "4a0d71a304a71566a36844a8a20f314033aeabcd4c503646794bf6f814e9965c",
+  "memo": "AgentProfile:agentproof-trading-guardian-v1:4a0d71a304a71566a36844a8a20f314033aeabcd4c503646794bf6f814e9965c",
+  "chain": "Injective Testnet",
+  "provider": "InjectiveProvider",
+  "txHash": "91011BC2497453685F0922D86C4E2556E6965BFC414827D43901A24C7052A712",
+  "explorerUrl": "https://testnet.explorer.injective.network/transaction/91011BC2497453685F0922D86C4E2556E6965BFC414827D43901A24C7052A712",
+  "timestamp": "2026-06-29T16:08:43.210Z"
+}

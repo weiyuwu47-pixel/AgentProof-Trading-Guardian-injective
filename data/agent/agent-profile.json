@@ -1,0 +1,35 @@
+{
+  "agentProfileId": "agentproof-trading-guardian-v1",
+  "agentName": "AgentProof Trading Guardian",
+  "agentType": "TRADING_GUARDIAN",
+  "chain": "Injective Testnet",
+  "version": "1.0.0",
+  "ownerAddress": "",
+  "capabilities": [
+    "market_data_monitoring",
+    "strategy_policy_evaluation",
+    "risk_constraint_checking",
+    "trading_decision_generation",
+    "behavior_log_generation",
+    "proof_hash_generation",
+    "injective_memo_anchoring"
+  ],
+  "authorizedInputs": [
+    "user_trading_strategy",
+    "market_price",
+    "volume",
+    "moving_average",
+    "position_data"
+  ],
+  "forbiddenInputs": [
+    "private_key",
+    "unauthorized_exchange_account",
+    "unverified_news",
+    "fabricated_market_data"
+  ],
+  "serviceEndpoints": {
+    "demo": "local-cli",
+    "proofMetadata": "reports/trading-proof-*.json"
+  },
+  "createdAt": "2026-06-30T00:00:00.000Z"
+}
