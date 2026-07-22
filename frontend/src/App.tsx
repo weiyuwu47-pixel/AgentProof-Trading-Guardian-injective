@@ -1,42 +1,33 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertTriangle,
-  ArrowLeft,
+  ArrowRight,
   BellRing,
-  BookOpen,
   CheckCircle2,
+  ChevronDown,
   Circle,
+  ClipboardCheck,
   Code2,
-  Fingerprint,
+  Copy,
+  Database,
+  FileJson,
   Github,
   Play,
-  RadioTower,
+  RefreshCw,
   RotateCcw,
   ShieldAlert,
   ShieldCheck,
   Terminal,
   X
 } from "lucide-react";
+import guardianImage from "./assets/guardian-officer.png";
 import proof from "./data/latest-proof.json";
 import decisionAnchor from "./data/latest-anchor.json";
-import agentAnchor from "./data/latest-agent-profile-anchor.json";
 import type { AnchorReport, ProofData } from "./types";
-import { AgentIdentityCard } from "./components/AgentIdentityCard";
-import { ArchitectureFlow } from "./components/ArchitectureFlow";
-import { BehaviorLogCard } from "./components/BehaviorLogCard";
-import { CopyButton } from "./components/CopyButton";
-import { InjectiveAnchorCard } from "./components/InjectiveAnchorCard";
-import { MarketSnapshotCard } from "./components/MarketSnapshotCard";
-import { MultiAgentRoadmap } from "./components/MultiAgentRoadmap";
-import { ProofBoundary } from "./components/ProofBoundary";
-import { ProofPackageCard } from "./components/ProofPackageCard";
-import { ProofSummary } from "./components/ProofSummary";
-import { StrategyCard } from "./components/StrategyCard";
-import { TradingDecisionCard } from "./components/TradingDecisionCard";
-import { VerificationChecklist } from "./components/VerificationChecklist";
 
 type Route = "/" | "/user-demo" | "/hallucination-demo" | "/developer";
 type DemoStatus = "idle" | "running" | "passed";
+type StepState = "pending" | "running" | "passed";
 
 interface DemoForm {
   market: string;
@@ -51,42 +42,43 @@ interface DemoForm {
 
 const proofData = proof as ProofData;
 const decisionAnchorData = decisionAnchor as AnchorReport;
-const agentAnchorData = agentAnchor as AnchorReport;
-
 const routes: Route[] = ["/", "/user-demo", "/hallucination-demo", "/developer"];
 
-const userDemoSteps = [
-  "读取用户策略",
-  "模拟读取市场数据",
-  "Agent 生成交易决策",
-  "执行策略检查",
-  "执行风控检查",
-  "记录行为日志",
-  "生成 proof package",
-  "生成 proof hash",
-  "展示 Injective anchor",
-  "Verifier 重新计算并验证",
-  "生成 verified alert"
-];
-
 const defaultForm: DemoForm = {
-  market: "A_SHARE",
+  market: "A股",
   stockCode: proofData.strategy.asset,
   stockName: proofData.strategy.assetName,
-  strategyText: proofData.strategy.rules.join("；"),
+  strategyText: "以5日均线为支撑，10日均线为压力；若价格站稳112且成交量放大，则继续持有；若跌破106且风险上升，则减仓；保持底仓，不允许清仓。",
   currentPositionShares: proofData.strategy.currentPositionShares,
   maxPositionShares: proofData.strategy.maxPositionShares,
   minBasePositionShares: proofData.strategy.minBasePositionShares,
-  riskLevel: proofData.strategy.riskLevel
+  riskLevel: "中等"
 };
 
+const demoSteps = [
+  "读取用户策略",
+  "模拟读取市场数据",
+  "Agent 生成交易决策",
+  "执行风控检查",
+  "生成 proof hash",
+  "Verifier 验证"
+];
+
 const developerCommands = [
-  { label: "Install dependencies", value: "npm install" },
-  { label: "Run trading demo", value: "npm run demo:trading" },
-  { label: "Run verifier", value: "npm run verify:trading" },
-  { label: "Run hallucination demo", value: "npm run demo:hallucination" },
-  { label: "Register agent identity", value: "npm run register:agent" },
-  { label: "Anchor on Injective testnet", value: "USE_REAL_INJECTIVE=true npm run anchor:injective" }
+  { label: "安装依赖", hint: "安装项目所需依赖包", command: "npm install" },
+  { label: "运行普通 demo", hint: "体验普通用户虚拟交易流程", command: "npm run demo:trading" },
+  { label: "运行 verifier", hint: "启动可信验证服务（本地）", command: "npm run verify:trading" },
+  { label: "运行幻觉检测 demo", hint: "体验 AI 编造检测与决策拦截", command: "npm run demo:hallucination" },
+  { label: "注册 Agent 身份", hint: "生成并上链注册 Agent 身份", command: "npm run register:agent" },
+  { label: "真实 Injective testnet anchoring", hint: "将行为日志真实锚定至 Injective 测试网", command: "USE_REAL_INJECTIVE=true npm run anchor:injective" }
+];
+
+const techFlow = [
+  { title: "Agent Identity", text: "身份注册与签名" },
+  { title: "Stable JSON Hashing", text: "标准化与哈希" },
+  { title: "Behavior Log", text: "行为日志记录" },
+  { title: "Injective Anchor", text: "测试网链上锚定" },
+  { title: "Local Verifier", text: "本地验证与审计" }
 ];
 
 function getInitialRoute(): Route {
@@ -112,10 +104,10 @@ function App() {
   return (
     <main className="app-shell">
       <TopNav route={route} navigate={navigate} />
-      {route === "/" ? <HomePage navigate={navigate} /> : null}
+      {route === "/" ? <LandingPage navigate={navigate} /> : null}
       {route === "/user-demo" ? <UserDemoPage navigate={navigate} /> : null}
       {route === "/hallucination-demo" ? <HallucinationPage navigate={navigate} /> : null}
-      {route === "/developer" ? <DeveloperPage navigate={navigate} /> : null}
+      {route === "/developer" ? <DeveloperPage /> : null}
     </main>
   );
 }
@@ -123,13 +115,21 @@ function App() {
 function TopNav({ route, navigate }: { route: Route; navigate: (route: Route) => void }) {
   return (
     <header className="top-nav">
-      <button className="brand-button" type="button" onClick={() => navigate("/")}>
-        <ShieldCheck size={18} />
-        <span>芙副官</span>
+      <button className="brand-lockup" type="button" onClick={() => navigate("/")}>
+        <span className="brand-mark">
+          <ShieldCheck size={24} />
+        </span>
+        <span>
+          <strong>芙副官</strong>
+          <small>AgentProof Trading Guardian</small>
+        </span>
       </button>
-      <nav aria-label="Primary navigation">
+      <nav aria-label="主导航">
         <button className={route === "/user-demo" ? "active" : ""} type="button" onClick={() => navigate("/user-demo")}>
-          用户体验
+          普通用户体验
+        </button>
+        <button className={route === "/developer" ? "active" : ""} type="button" onClick={() => navigate("/developer")}>
+          开发者体验
         </button>
         <button
           className={route === "/hallucination-demo" ? "active" : ""}
@@ -138,59 +138,46 @@ function TopNav({ route, navigate }: { route: Route; navigate: (route: Route) =>
         >
           幻觉演示
         </button>
-        <button className={route === "/developer" ? "active" : ""} type="button" onClick={() => navigate("/developer")}>
-          开发者
-        </button>
       </nav>
     </header>
   );
 }
 
-function HomePage({ navigate }: { navigate: (route: Route) => void }) {
+function LandingPage({ navigate }: { navigate: (route: Route) => void }) {
   return (
-    <>
-      <section className="product-hero">
-        <div className="hero-copy-block">
-          <div className="eyebrow">
-            <Fingerprint size={18} />
-            Verifiable Decision Layer
-          </div>
-          <h1>芙副官</h1>
-          <p className="subtitle">AI 金融 Agent 的可验证决策层</p>
-          <p className="hero-copy">
-            输入股票代码和自然语言策略，体验 AI 盯盘 Agent 如何生成决策、记录行为、生成 proof，并验证是否遵守规则。
-          </p>
-          <div className="hero-actions">
-            <button className="primary-action" type="button" onClick={() => navigate("/user-demo")}>
-              <Play size={18} />
-              普通用户，体验虚拟运算流程
-            </button>
-            <button className="primary-action secondary" type="button" onClick={() => navigate("/developer")}>
-              <Terminal size={18} />
-              我是开发者，部署到本地自行接入真实 API 体验全流程
-            </button>
-          </div>
+    <section className="landing-hero">
+      <div className="hero-content">
+        <div className="brand-kicker">
+          <ShieldCheck size={18} />
+          AI 金融 Agent 的信任层
         </div>
-        <div className="proof-console" aria-label="Current proof status">
-          <div className="status-pill">v0.1.0 baseline frozen</div>
-          <ProofMetric label="Agent Identity" value={proofData.agentProfileHash} />
-          <ProofMetric label="Proof Hash" value={proofData.proofHash} />
-          <ProofMetric label="Decision Anchor" value={decisionAnchorData.txHash} />
-        </div>
-      </section>
+        <h1>芙副官</h1>
+        <p className="english-name">AgentProof Trading Guardian</p>
+        <h2>AI 金融 Agent 的可验证决策层</h2>
+        <p className="hero-summary">验证 AI 是否读取真实数据、遵守策略、通过风控，并将 proof 锚定到 Injective。</p>
 
-      <section className="panel wide">
-        <div className="section-title">
-          <ShieldCheck size={20} />
-          <h2>产品定位</h2>
+        <div className="hero-actions">
+          <button className="primary-action" type="button" onClick={() => navigate("/user-demo")}>
+            <ShieldCheck size={20} />
+            普通用户，体验虚拟运算流程
+            <ArrowRight size={20} />
+          </button>
+          <button className="secondary-action" type="button" onClick={() => navigate("/developer")}>
+            <Terminal size={20} />
+            我是开发者，部署到本地自行接入真实 API
+            <ArrowRight size={20} />
+          </button>
         </div>
-        <div className="value-grid">
-          <ValueCard title="不是自动交易 Bot" text="AgentProof 不托管资金、不承诺收益，聚焦验证 AI 决策是否按策略产生。" />
-          <ValueCard title="普通提醒升级为 Verified Alert" text="用户看到的不只是交易提醒，而是带 proof、行为日志和 Injective anchor 的验证结果。" />
-          <ValueCard title="AI financial agent trust layer" text="为 trading agents、wallet agents、portfolio agents 和 DeFi automation 提供可信边界。" />
+
+        <div className="value-strip" aria-label="核心价值">
+          <ValuePill icon={<ShieldCheck size={22} />} title="可验证" />
+          <ValuePill icon={<Database size={22} />} title="可追溯" />
+          <ValuePill icon={<ClipboardCheck size={22} />} title="可信任" />
         </div>
-      </section>
-    </>
+      </div>
+
+      <GuardianPanel size="large" />
+    </section>
   );
 }
 
@@ -203,35 +190,9 @@ function UserDemoPage({ navigate }: { navigate: (route: Route) => void }) {
   const [formError, setFormError] = useState("");
   const timers = useRef<number[]>([]);
 
-  const demoProof = useMemo(() => {
-    const rules = form.strategyText
-      .split(/[;；\n]/)
-      .map((rule) => rule.trim())
-      .filter(Boolean);
-
-    return {
-      ...proofData,
-      strategy: {
-        ...proofData.strategy,
-        asset: form.stockCode,
-        assetName: form.stockName,
-        market: form.market,
-        riskLevel: form.riskLevel,
-        currentPositionShares: form.currentPositionShares,
-        maxPositionShares: form.maxPositionShares,
-        minBasePositionShares: form.minBasePositionShares,
-        rules: rules.length > 0 ? rules : proofData.strategy.rules
-      },
-      decision: {
-        ...proofData.decision,
-        reason: "当前价格未满足买入条件，且卖出会违反最低底仓限制，因此保持 HOLD。"
-      },
-      behaviorLog: {
-        ...proofData.behaviorLog,
-        task: `Verify ${form.stockCode} against user strategy and position limits.`
-      }
-    } satisfies ProofData;
-  }, [form]);
+  const decisionReason = useMemo(() => {
+    return "价格位于关键策略区间内，未满足放量突破条件；当前仓位符合底仓要求，建议继续持有。";
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -275,170 +236,164 @@ function UserDemoPage({ navigate }: { navigate: (route: Route) => void }) {
     setActiveStep(0);
     setHasRun(false);
 
-    userDemoSteps.forEach((_, index) => {
-      const timer = window.setTimeout(() => setActiveStep(index), index * 280);
+    demoSteps.forEach((_, index) => {
+      const timer = window.setTimeout(() => setActiveStep(index), index * 320);
       timers.current.push(timer);
     });
+
     const doneTimer = window.setTimeout(() => {
-      setActiveStep(userDemoSteps.length - 1);
+      setActiveStep(demoSteps.length - 1);
       setDemoStatus("passed");
       setHasRun(true);
-    }, userDemoSteps.length * 280 + 120);
+    }, demoSteps.length * 320 + 180);
     timers.current.push(doneTimer);
   };
 
   return (
     <>
-      <section className="page-heading">
-        <button className="text-action" type="button" onClick={() => navigate("/")}>
-          <ArrowLeft size={16} />
-          返回开始页
-        </button>
-        <button className="text-action danger" type="button" onClick={() => navigate("/hallucination-demo")}>
-          <ShieldAlert size={16} />
-          幻觉演示
-        </button>
-        <h1>普通用户虚拟运算流程</h1>
-        <p className="hero-copy">当前为虚拟运算体验，用于演示验证流程；真实 API 与 Injective testnet 接入请查看开发者页面。</p>
-      </section>
+      <PageIntro
+        icon={<Play size={26} />}
+        title="普通用户体验"
+        subtitle="输入股票与策略，体验 AI 决策如何被验证。"
+        action={
+          <button className="ghost-action" type="button" onClick={() => navigate("/hallucination-demo")}>
+            <ShieldAlert size={18} />
+            幻觉演示
+          </button>
+        }
+      />
 
-      <section className="workspace-layout">
-        <form className="panel input-panel" onSubmit={(event) => event.preventDefault()}>
-          <div className="section-title">
-            <BookOpen size={20} />
+      <section className="user-workspace">
+        <form className="glass-card input-card" onSubmit={(event) => event.preventDefault()}>
+          <div className="card-heading">
             <h2>输入股票与策略</h2>
+            <span>当前为虚拟运算体验</span>
           </div>
+
           <div className="form-grid">
-            <label>
-              <span>市场</span>
+            <FormField label="市场">
               <select value={form.market} onChange={(event) => updateForm("market", event.target.value)}>
-                <option value="A_SHARE">A股</option>
-                <option value="HK_STOCK">港股</option>
-                <option value="US_STOCK">美股</option>
+                <option>A股</option>
+                <option>港股</option>
+                <option>美股</option>
               </select>
-            </label>
-            <label>
-              <span>股票代码</span>
+            </FormField>
+            <FormField label="股票代码">
               <input value={form.stockCode} onChange={(event) => updateForm("stockCode", event.target.value)} />
-            </label>
-            <label>
-              <span>股票名称</span>
+            </FormField>
+            <FormField label="股票名称">
               <input value={form.stockName} onChange={(event) => updateForm("stockName", event.target.value)} />
-            </label>
-            <label>
-              <span>风险等级</span>
-              <select value={form.riskLevel} onChange={(event) => updateForm("riskLevel", event.target.value)}>
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-              </select>
-            </label>
+            </FormField>
           </div>
-          <label className="full-field">
-            <span>自然语言策略</span>
+
+          <FormField label="自然语言策略">
             <textarea value={form.strategyText} onChange={(event) => updateForm("strategyText", event.target.value)} />
-          </label>
+          </FormField>
+
           <div className="form-grid">
-            <label>
-              <span>当前持仓</span>
+            <FormField label="当前持仓">
               <input
                 type="number"
                 min="0"
                 value={form.currentPositionShares}
                 onChange={(event) => updateForm("currentPositionShares", Number(event.target.value))}
               />
-            </label>
-            <label>
-              <span>最大仓位</span>
+            </FormField>
+            <FormField label="最大仓位">
               <input
                 type="number"
                 min="0"
                 value={form.maxPositionShares}
                 onChange={(event) => updateForm("maxPositionShares", Number(event.target.value))}
               />
-            </label>
-            <label>
-              <span>最低底仓</span>
+            </FormField>
+            <FormField label="最低底仓">
               <input
                 type="number"
                 min="0"
                 value={form.minBasePositionShares}
                 onChange={(event) => updateForm("minBasePositionShares", Number(event.target.value))}
               />
-            </label>
+            </FormField>
           </div>
+
           {formError ? <p className="form-error">{formError}</p> : null}
+
           <div className="button-row">
             <button className="primary-action" type="button" onClick={startDemo}>
-              <Play size={18} />
+              <ShieldCheck size={20} />
               开始验证 Agent 决策
+              <ArrowRight size={20} />
             </button>
-            <button className="primary-action secondary" type="button" onClick={resetDemo}>
+            <button className="secondary-action compact" type="button" onClick={resetDemo}>
               <RotateCcw size={18} />
               重新开始体验
             </button>
           </div>
         </form>
 
-        <section className="panel">
-          <div className="section-title">
-            <RadioTower size={20} />
+        <section className="glass-card progress-card">
+          <div className="card-heading">
             <h2>验证进度</h2>
+            <span>{demoStatus === "passed" ? "验证通过" : demoStatus === "running" ? "运行中" : "等待开始"}</span>
           </div>
           <ol className="step-list">
-            {userDemoSteps.map((step, index) => {
+            {demoSteps.map((step, index) => {
               const state = getStepState(index, activeStep, demoStatus);
               return (
                 <li className={state} key={step}>
-                  {state === "passed" ? <CheckCircle2 size={18} /> : <Circle size={18} />}
-                  <span>{step}</span>
+                  <span className="step-icon">
+                    {state === "passed" ? <CheckCircle2 size={19} /> : state === "running" ? <RefreshCw size={19} /> : <Circle size={19} />}
+                  </span>
+                  <span>
+                    {step}
+                    <small>{state === "passed" ? "已完成" : state === "running" ? "正在执行" : "待验证"}</small>
+                  </span>
                 </li>
               );
             })}
           </ol>
+          <GuardianPanel size="small" />
         </section>
       </section>
 
-      <section className={`result-band ${hasRun ? "ready" : ""}`}>
-        <div className="panel wide">
-          <div className="section-title">
+      <section className={`glass-card result-card ${hasRun ? "ready" : ""}`}>
+        <div className="card-heading">
+          <h2>验证结果</h2>
+          <span>本页面为虚拟运算体验，所有数据均为模拟生成，不构成任何投资建议。</span>
+        </div>
+        <div className="result-grid">
+          <ResultBlock label="股票" value={`${form.stockCode} / ${form.stockName}`} />
+          <ResultBlock label="Agent 决策" value="HOLD" helper="持有" strong />
+          <ResultBlock label="验证状态" value={hasRun ? "PASSED" : "待验证"} helper={hasRun ? "验证通过" : "等待运行"} success={hasRun} />
+          <div className="result-reason">
+            <span>决策理由（摘要）</span>
+            <p>{decisionReason}</p>
+          </div>
+          <button className="primary-action alert-button" type="button" disabled={!hasRun} onClick={() => setAlertOpen(true)}>
             <BellRing size={20} />
-            <h2>验证结果</h2>
-          </div>
-          <div className="result-grid">
-            <ResultMetric label="Asset" value={`${demoProof.strategy.asset} / ${demoProof.strategy.assetName}`} />
-            <ResultMetric label="Decision" value={demoProof.decision.action} tone="success" />
-            <ResultMetric label="Verification" value={demoProof.verification.status} tone="success" />
-            <ResultMetric label="Proof Status" value="Anchored / Mock Anchored" />
-            <ResultMetric label="Alert Type" value="Verified Alert" />
-          </div>
-          <p className="reason">{demoProof.decision.reason}</p>
-          <button className="primary-action" type="button" disabled={!hasRun} onClick={() => setAlertOpen(true)}>
-            <BellRing size={18} />
             查看用户收到的可验证提醒
+            <ArrowRight size={20} />
           </button>
         </div>
       </section>
 
       {hasRun ? (
-        <section className="dashboard-grid">
-          <AgentIdentityCard proof={demoProof} anchor={agentAnchorData} />
-          <TradingDecisionCard proof={demoProof} />
-          <StrategyCard proof={demoProof} />
-          <MarketSnapshotCard proof={demoProof} />
-          <BehaviorLogCard proof={demoProof} />
-          <ProofPackageCard proof={demoProof} />
-          <VerificationChecklist proof={demoProof} decisionAnchor={decisionAnchorData} agentAnchor={agentAnchorData} />
-          <ProofSummary proof={demoProof} anchor={decisionAnchorData} />
-          <InjectiveAnchorCard decisionAnchor={decisionAnchorData} agentAnchor={agentAnchorData} />
-          <MultiAgentRoadmap />
-          <ArchitectureFlow />
+        <section className="detail-drawer">
+          <SummaryChip icon={<FileJson size={18} />} title="Proof Hash" value={proofData.proofHash} />
+          <SummaryChip icon={<Database size={18} />} title="Injective Anchor" value={decisionAnchorData.txHash} />
+          <SummaryChip icon={<ClipboardCheck size={18} />} title="Behavior Log" value="已记录策略、行情、风控与输出" />
         </section>
       ) : null}
 
-      <ProofBoundary />
-
-      {alertOpen ? <VerifiedAlertModal proof={demoProof} anchor={decisionAnchorData} onClose={() => setAlertOpen(false)} /> : null}
+      {alertOpen ? (
+        <VerifiedAlertModal
+          asset={`${form.stockCode} / ${form.stockName}`}
+          decision="HOLD"
+          verification="PASSED"
+          onClose={() => setAlertOpen(false)}
+        />
+      ) : null}
     </>
   );
 }
@@ -446,233 +401,319 @@ function UserDemoPage({ navigate }: { navigate: (route: Route) => void }) {
 function HallucinationPage({ navigate }: { navigate: (route: Route) => void }) {
   return (
     <>
-      <section className="page-heading danger-heading">
-        <button className="text-action" type="button" onClick={() => navigate("/user-demo")}>
-          <ArrowLeft size={16} />
-          返回用户体验
-        </button>
-        <h1>幻觉演示</h1>
-        <p className="hero-copy">当 AI Agent 编造行情或违反用户策略时，AgentProof 会用记录中的数据、策略、行为日志和 hash 重新验证并拒绝该决策。</p>
-      </section>
+      <PageIntro
+        icon={<ShieldAlert size={26} />}
+        title="幻觉演示"
+        subtitle="当 AI Agent 编造行情时，系统如何拒绝错误决策。"
+        action={
+          <button className="ghost-action" type="button" onClick={() => navigate("/user-demo")}>
+            <ArrowRight size={18} />
+            返回正常案例
+          </button>
+        }
+      />
 
-      <section className="hallucination-grid">
-        <CasePanel
-          tone="normal"
+      <section className="hallucination-flow">
+        <FlowCard
+          tone="blue"
+          icon={<Database size={24} />}
           title="真实记录数据"
-          rows={[
-            ["股票", "600941 / 中国移动"],
-            ["记录最高价", "108.90"],
-            ["用户策略", "只有放量突破 112.00 才允许 BUY"]
-          ]}
+          items={["股票：600941 / 中国移动", "记录最高价：108.90", "用户策略：只有放量突破 112.00 才允许 BUY"]}
         />
-        <CasePanel
-          tone="rejected"
-          title="Agent 幻觉输出"
-          rows={[
-            ["Agent 声称", "价格已突破 112.00，建议 BUY。"],
-            ["决策", "BUY"],
-            ["问题", "声称的突破信号不存在"]
-          ]}
-        />
-      </section>
-
-      <section className="panel wide">
-        <div className="section-title">
-          <ShieldAlert size={20} />
-          <h2>Verifier 检查过程</h2>
+        <div className="flow-arrow">
+          <ArrowRight size={30} />
         </div>
-        <ol className="verifier-path">
-          <li>
-            <CheckCircle2 size={18} />
-            <span>读取 recorded market snapshot：最高价 108.90。</span>
-          </li>
-          <li>
-            <CheckCircle2 size={18} />
-            <span>解析用户策略：突破 112.00 才允许 BUY。</span>
-          </li>
-          <li>
-            <AlertTriangle size={18} />
-            <span>对比 Agent 输出：BUY 的依据与记录数据不一致。</span>
-          </li>
-          <li>
-            <ShieldAlert size={18} />
-            <span>Verification: REJECTED；Reason: hallucinated market data detected。</span>
-          </li>
-        </ol>
+        <FlowCard
+          tone="warn"
+          icon={<AlertTriangle size={24} />}
+          title="Agent 幻觉输出"
+          items={["声称价格已突破 112.00，建议 BUY", "该输出与记录行情不一致"]}
+        />
+        <div className="flow-arrow">
+          <ArrowRight size={30} />
+        </div>
+        <FlowCard
+          tone="green"
+          icon={<ClipboardCheck size={24} />}
+          title="Verifier 检查"
+          items={["记录最高价未达到 112.00", "突破信号不存在", "BUY 决策不符合用户策略"]}
+        />
       </section>
 
-      <section className="panel wide rejection-summary">
-        <div className="status-pill rejected">Verification Rejected</div>
-        <h2>AgentProof 不依赖 AI 自己声称诚实</h2>
-        <p className="reason">
-          系统会用记录中的市场数据、用户策略、行为日志和 stable JSON hash 重新验证。只要输出与记录不一致，BUY / SELL 决策就会被拒绝。
-        </p>
-        <button className="primary-action" type="button" onClick={() => navigate("/user-demo")}>
-          <Play size={18} />
-          回到正常案例
+      <section className="glass-card rejection-card">
+        <div className="rejection-mark">
+          <ShieldAlert size={54} />
+        </div>
+        <div>
+          <span>最终结果</span>
+          <strong>REJECTED</strong>
+          <p>检测到幻觉市场数据。Agent 输出与真实记录不符，且违反用户策略，系统已拒绝该决策。</p>
+        </div>
+        <button className="secondary-action compact" type="button" onClick={() => navigate("/user-demo")}>
+          返回正常案例
         </button>
       </section>
+
+      <GuardianWatermark />
     </>
   );
 }
 
-function DeveloperPage({ navigate }: { navigate: (route: Route) => void }) {
+function DeveloperPage() {
   return (
     <>
-      <section className="page-heading">
-        <button className="text-action" type="button" onClick={() => navigate("/")}>
-          <ArrowLeft size={16} />
-          返回开始页
-        </button>
-        <h1>开发者本地接入</h1>
-        <p className="hero-copy">Clone repo、配置本地 `.env`，即可运行 CLI demo、verifier、hallucination detection 和 Injective testnet anchoring。</p>
-      </section>
+      <PageIntro icon={<Code2 size={26} />} title="开发者体验" subtitle="本地部署并接入真实 API，运行 verifier 与 Injective testnet anchoring。" />
 
-      <section className="developer-layout">
-        <div className="panel">
-          <div className="section-title">
-            <Github size={20} />
-            <h2>项目仓库</h2>
-          </div>
-          <a
-            className="repo-link"
-            href="https://github.com/weiyuwu47-pixel/AgentProof-Trading-Guardian-injective"
-            target="_blank"
-            rel="noreferrer"
-          >
-            github.com/weiyuwu47-pixel/AgentProof-Trading-Guardian-injective
-          </a>
-          <p className="note">v0.1.0 has been frozen as the baseline before this frontend product refactor.</p>
-        </div>
+      <section className="developer-grid">
+        <aside className="developer-side">
+          <section className="glass-card repo-card">
+            <div className="card-heading">
+              <h2>项目仓库</h2>
+            </div>
+            <p>开源代码，欢迎提交 Issue 与 PR，共建可信 AI 交易生态。</p>
+            <a className="repo-link" href="https://github.com/weiyuwu47-pixel/AgentProof-Trading-Guardian-injective" target="_blank" rel="noreferrer">
+              <Github size={18} />
+              github.com/weiyuwu47-pixel/AgentProof-Trading-Guardian-injective
+            </a>
+          </section>
 
-        <div className="panel">
-          <div className="section-title">
-            <Code2 size={20} />
-            <h2>环境变量</h2>
-          </div>
-          <p className="note">请在本地创建 .env，不要提交私钥或助记词。</p>
-          <pre className="code-block">{`USE_REAL_INJECTIVE=true
+          <section className="glass-card env-card">
+            <div className="card-heading">
+              <h2>环境变量</h2>
+            </div>
+            <p>请在本地创建 .env，不要提交私钥或助记词。</p>
+            <pre>{`USE_REAL_INJECTIVE=true
 INJECTIVE_NETWORK=testnet
 INJECTIVE_PRIVATE_KEY=
 INJECTIVE_ADDRESS=
 INJECTIVE_MEMO_PREFIX=AgentProof`}</pre>
-        </div>
+          </section>
+        </aside>
+
+        <section className="glass-card command-card">
+          <div className="card-heading">
+            <h2>运行命令</h2>
+            <span>复制后在项目根目录执行</span>
+          </div>
+          <div className="command-list">
+            {developerCommands.map((item, index) => (
+              <CommandRow key={item.command} index={index + 1} {...item} />
+            ))}
+          </div>
+        </section>
       </section>
 
-      <section className="panel wide">
-        <div className="section-title">
-          <Terminal size={20} />
-          <h2>CLI Demo Commands</h2>
+      <section className="glass-card tech-chain">
+        <div className="card-heading">
+          <h2>技术链路</h2>
+          <span>从身份到本地验证的最小可信闭环</span>
         </div>
-        <div className="command-grid">
-          {developerCommands.map((command) => (
-            <div className="command-row" key={command.value}>
-              <span>{command.label}</span>
-              <code>{command.value}</code>
-              <CopyButton value={command.value} label={`Copy ${command.label}`} />
+        <div className="tech-flow">
+          {techFlow.map((node, index) => (
+            <div className="tech-node" key={node.title}>
+              <span>{index + 1}</span>
+              <strong>{node.title}</strong>
+              <small>{node.text}</small>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="dashboard-grid">
-        <AgentIdentityCard proof={proofData} anchor={agentAnchorData} />
-        <ProofSummary proof={proofData} anchor={decisionAnchorData} />
-        <VerificationChecklist proof={proofData} decisionAnchor={decisionAnchorData} agentAnchor={agentAnchorData} />
-        <InjectiveAnchorCard decisionAnchor={decisionAnchorData} agentAnchor={agentAnchorData} />
-        <ProofPackageCard proof={proofData} />
-        <ArchitectureFlow />
-      </section>
+      <GuardianWatermark />
     </>
   );
 }
 
-function VerifiedAlertModal({
-  proof,
-  anchor,
-  onClose
+function PageIntro({
+  icon,
+  title,
+  subtitle,
+  action
 }: {
-  proof: ProofData;
-  anchor: AnchorReport;
-  onClose: () => void;
+  icon: React.ReactNode;
+  title: string;
+  subtitle: string;
+  action?: React.ReactNode;
 }) {
   return (
-    <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="verified-alert-title">
-      <div className="modal">
-        <button className="modal-close" type="button" aria-label="Close alert" onClick={onClose}>
-          <X size={18} />
-        </button>
-        <div className="section-title">
-          <BellRing size={20} />
-          <h2 id="verified-alert-title">Verified Trading Alert</h2>
-        </div>
-        <p className="reason">芙副官已生成一条经过验证的盯盘提醒。</p>
-        <div className="alert-summary">
-          <span>股票：{proof.strategy.asset} / {proof.strategy.assetName}</span>
-          <span>决策：{proof.decision.action}</span>
-          <span>验证结果：{proof.verification.status}</span>
-          <span>Proof：已锚定到 Injective testnet / 已完成模拟锚定</span>
-        </div>
-        <p className="note">这不是普通交易提醒，而是一条带有 proof 的 verified alert。</p>
-        {anchor.explorerUrl ? (
-          <a className="primary-link" href={anchor.explorerUrl} target="_blank" rel="noreferrer">
-            Open proof anchor
-          </a>
-        ) : null}
-        <button className="primary-action secondary" type="button" onClick={onClose}>
-          关闭并继续查看验证详情
-        </button>
+    <section className="page-intro">
+      <div className="intro-icon">{icon}</div>
+      <div>
+        <h1>{title}</h1>
+        <p>{subtitle}</p>
+      </div>
+      {action ? <div className="intro-action">{action}</div> : null}
+    </section>
+  );
+}
+
+function GuardianPanel({ size }: { size: "large" | "small" }) {
+  return (
+    <div className={`guardian-panel ${size}`}>
+      <div className="holo-ring" />
+      <img src={guardianImage} alt="芙副官 AI 金融验证守护者" />
+    </div>
+  );
+}
+
+function GuardianWatermark() {
+  return (
+    <div className="guardian-watermark" aria-hidden="true">
+      <img src={guardianImage} alt="" />
+    </div>
+  );
+}
+
+function ValuePill({ icon, title }: { icon: React.ReactNode; title: string }) {
+  return (
+    <div className="value-pill">
+      <span>{icon}</span>
+      <strong>{title}</strong>
+    </div>
+  );
+}
+
+function FormField({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="form-field">
+      <span>{label}</span>
+      {children}
+    </label>
+  );
+}
+
+function ResultBlock({
+  label,
+  value,
+  helper,
+  strong,
+  success
+}: {
+  label: string;
+  value: string;
+  helper?: string;
+  strong?: boolean;
+  success?: boolean;
+}) {
+  return (
+    <div className={`result-block ${strong ? "strong" : ""} ${success ? "success" : ""}`}>
+      <span>{label}</span>
+      <strong>{value}</strong>
+      {helper ? <small>{helper}</small> : null}
+    </div>
+  );
+}
+
+function SummaryChip({ icon, title, value }: { icon: React.ReactNode; title: string; value: string }) {
+  return (
+    <div className="summary-chip">
+      <span>{icon}</span>
+      <div>
+        <strong>{title}</strong>
+        <code>{value}</code>
       </div>
     </div>
   );
 }
 
-function ProofMetric({ label, value }: { label: string; value: string }) {
+function FlowCard({
+  tone,
+  icon,
+  title,
+  items
+}: {
+  tone: "blue" | "warn" | "green";
+  icon: React.ReactNode;
+  title: string;
+  items: string[];
+}) {
   return (
-    <div className="hero-metric">
-      <span>{label}</span>
-      <code>{value}</code>
-      <CopyButton value={value} label={`Copy ${label}`} />
-    </div>
-  );
-}
-
-function ValueCard({ title, text }: { title: string; text: string }) {
-  return (
-    <div className="value-card">
-      <h3>{title}</h3>
-      <p>{text}</p>
-    </div>
-  );
-}
-
-function ResultMetric({ label, value, tone }: { label: string; value: string; tone?: "success" }) {
-  return (
-    <div className={tone === "success" ? "result-metric success" : "result-metric"}>
-      <span>{label}</span>
-      <strong>{value}</strong>
-    </div>
-  );
-}
-
-function CasePanel({ title, rows, tone }: { title: string; rows: string[][]; tone: "normal" | "rejected" }) {
-  return (
-    <section className={`case-card ${tone}`}>
+    <section className={`glass-card flow-card ${tone}`}>
+      <div className="flow-icon">{icon}</div>
       <h2>{title}</h2>
-      {rows.map(([label, value]) => (
-        <p key={label}>
-          <strong>{label}：</strong>
-          {value}
-        </p>
-      ))}
+      <ul>
+        {items.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
     </section>
   );
 }
 
-function getStepState(index: number, activeStep: number, demoStatus: DemoStatus) {
-  if (demoStatus === "passed") return "passed";
-  if (demoStatus === "running" && index < activeStep) return "passed";
-  if (demoStatus === "running" && index === activeStep) return "running";
+function CommandRow({
+  index,
+  label,
+  hint,
+  command
+}: {
+  index: number;
+  label: string;
+  hint: string;
+  command: string;
+}) {
+  const [copied, setCopied] = useState(false);
+
+  const copy = async () => {
+    await navigator.clipboard.writeText(command);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1200);
+  };
+
+  return (
+    <div className="command-row">
+      <span className="command-index">{index}</span>
+      <div className="command-meta">
+        <strong>{label}</strong>
+        <small>{hint}</small>
+      </div>
+      <code>{command}</code>
+      <button className="copy-action" type="button" aria-label={`复制 ${label}`} onClick={copy}>
+        {copied ? <CheckCircle2 size={18} /> : <Copy size={18} />}
+      </button>
+    </div>
+  );
+}
+
+function VerifiedAlertModal({
+  asset,
+  decision,
+  verification,
+  onClose
+}: {
+  asset: string;
+  decision: string;
+  verification: string;
+  onClose: () => void;
+}) {
+  return (
+    <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="verified-alert-title">
+      <section className="modal">
+        <button className="modal-close" type="button" aria-label="关闭提醒" onClick={onClose}>
+          <X size={18} />
+        </button>
+        <div className="modal-icon">
+          <BellRing size={30} />
+        </div>
+        <h2 id="verified-alert-title">可验证提醒</h2>
+        <p>芙副官已生成一条经过验证的盯盘提醒。</p>
+        <div className="alert-summary">
+          <span>股票：{asset}</span>
+          <span>决策：{decision}</span>
+          <span>验证结果：{verification}</span>
+          <span>Proof：已锚定到 Injective testnet / 已完成模拟锚定</span>
+        </div>
+        <button className="primary-action" type="button" onClick={onClose}>
+          关闭并继续查看验证详情
+        </button>
+      </section>
+    </div>
+  );
+}
+
+function getStepState(index: number, activeStep: number, status: DemoStatus): StepState {
+  if (status === "passed") return "passed";
+  if (status === "running" && index < activeStep) return "passed";
+  if (status === "running" && index === activeStep) return "running";
   return "pending";
 }
 
