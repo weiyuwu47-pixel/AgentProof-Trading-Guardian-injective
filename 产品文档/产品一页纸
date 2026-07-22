@@ -1,0 +1,191 @@
+# 芙副官 产品一页纸
+
+
+---
+
+## 1. 项目一句话介绍
+
+芙副官是一个面向 AI 金融 Agent 的可验证决策层，用于证明 AI 盯盘 / 交易辅助 Agent 是否真实读取了市场数据、遵守了用户策略、通过了风控限制，并将决策证明锚定到 Injective。
+
+---
+
+## 2. 项目背景
+
+现在盯盘 Agent、投资辅助工具正在快速发展。它们已经足够聪明，可以读取行情，生成交易建议。
+
+但是，用户不敢用ai辅助交易，原因是不信任。用户不知道：
+
+* AI 是否幻觉了行情数据？
+* AI 是否忽略了用户设置的交易策略？
+
+在金融交易这种情景，ai出现幻觉会产生严重后果。
+
+并且，未来是agent-to-agent的时代，在金融场景中不同agent会进行协作。就像人类一样，如果agent之间进行协作，也需要有身份证，有信用背书。
+
+---
+
+## 3. 核心问题
+
+芙副官不关注决策是否聪明，只关注的核心问题：
+
+> 如何验证 AI Agent 的决策过程是否可信？
+
+---
+
+## 4. 目标用户
+
+### 4.1 直接用户
+
+* 使用 AI 盯盘工具的个人投资者
+
+### 4.2 潜在集成方
+
+* 钱包产品
+* 交易平台
+* AI 交易策略agent
+* DeFi protocol
+* 风控agent
+* 多 Agent 金融工作流平台
+
+---
+
+## 5. 产品定位
+
+芙副官不是一个自动交易 bot，
+
+它的定位是：
+
+> 金融ai agent的信任层验证层
+
+它解决的是 AI 金融 Agent 在执行或建议前的可信验证问题：
+
+```text
+AI Agent 生成建议
+        ↓
+AgentProof 记录行为与输入
+        ↓
+生成 proof package
+        ↓
+proof hash 锚定 Injective
+        ↓
+用户 / 第三方重新验证
+```
+
+---
+
+## 6. 核心价值主张
+
+### 对用户
+
+用户收到的不只是普通交易提醒，而是 verified alert：
+
+* 这次建议依据了什么市场数据；
+* 是否符合自己的策略；
+* 是否违反风控；
+* 是否已经生成 proof；
+* proof 是否有链上锚点。
+
+### 对 AI Agent 开发者
+
+为 AI 辅助交易 增加可信验证能力，降低用户对 AI 幻觉和越权行为的担忧。
+
+
+---
+
+## 7. 当前 MVP 范围
+
+当前 hackathon MVP 已实现以下能力：
+
+* Agent Profile / Agent Identity
+* Agent profile hash
+* Agent identity anchoring on Injective testnet
+* 用户交易策略读取
+* 真实行情读取与 sample fallback
+* BUY / SELL / HOLD 决策生成
+* 行为日志记录
+* Stable JSON hashing
+* Proof metadata 生成
+* Proof hash 生成
+* Injective testnet memo anchoring
+* Local verifier 重新计算验证
+* Hallucination Detection Demo
+* 前端 AI Agent Audit Dashboard
+* 用户 verified alert 弹窗演示
+
+---
+
+## 8. 当前不做什么
+
+为了保持 MVP 聚焦，当前版本暂不做：
+
+* 自动下单
+* 真实资金托管
+* 收益承诺
+* 复杂回测系统
+* 高频交易策略
+* 完整官方 Agent Registry 集成
+* 多 Agent 协作的完整生产级实现
+
+当前版本重点验证的是：
+
+> AI 金融 Agent 的决策过程是否可以被记录、哈希、锚定和重新验证。
+
+---
+
+## 9. 为什么选择 Injective
+
+本项目选择 Injective 作为主要链上基础设施，原因是项目核心场景是金融 Agent。Injective 的定位就是面向 Web3 金融应用的高性能 L1
+
+
+---
+
+## 10. Demo 场景
+
+用户选择股票代码，自然语言大白话说出自己交易策略后，Agent 读取市场数据并MOKE生成决策。系统进一步记录：
+
+* 用户策略；
+* 市场数据；
+* Agent 行为日志；
+* 决策输出；
+
+开发者可将项目克隆到本地，配置真实.env文件，连接大模型api使用真实运算来生成决策。
+
+同时，项目包含 hallucination negative case：当 Agent 幻觉声称价格突破 112 并建议 BUY，但记录中的最高价并未达到该阈值时，verifier 会拒绝该决策。
+
+---
+
+## 11. 成功标准
+
+当前 MVP 的成功标准是：
+
+* 正常交易决策可以生成 proof；
+* proof 可以被本地 verifier 重新验证；
+* proof hash 可以锚定到 Injective testnet；
+* Agent profile hash 可以锚定到 Injective testnet；
+* hallucination case 可以被识别并拒绝；
+* 前端页面可以清晰展示 Agent 身份、决策、proof package、verification checklist 和 Injective anchors；
+* 用户能理解收到的是 verified alert，而不仅是普通交易提醒。
+
+---
+
+## 12. 项目当前状态
+
+| 模块                                          | 状态      |
+| ------------------------------------------- | ------- |
+| CLI Demo                                    | 已完成     |
+| 前端 Dashboard                                | 已完成     |
+| Agent Identity                              | 已完成 MVP |
+| Injective testnet anchoring                 | 已完成     |
+| Proof generation                            | 已完成     |
+| Local verification                          | 已完成     |
+| Hallucination detection demo                | 已完成     |
+| Multi-agent workflow                        | Roadmap |
+| Production-ready Agent Registry integration | Roadmap |
+
+---
+
+## 13. 一句话总结
+
+芙副官是为了证明 AI Agent 在给出建议前是否真的遵守了规则。
+
+Injective 提供金融执行和链上锚点，AgentProof 提供 AI 金融 Agent 的行为证明与信任层。
