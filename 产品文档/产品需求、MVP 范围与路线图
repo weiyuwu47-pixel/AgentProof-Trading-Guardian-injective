@@ -1,0 +1,934 @@
+# 产品需求、MVP 范围与路线图
+
+> 文档状态：Draft
+> 文档类型：PRD + MVP Scope + Roadmap
+> 项目名称：芙副官｜AgentProof Trading Guardian
+> 项目阶段：Hackathon MVP
+> 关联文档：`01-product-brief.md`、`02-user-problem-and-persona.md`
+
+---
+
+## 1. 文档目的
+
+本文档用于明确芙副官｜AgentProof Trading Guardian 当前 Hackathon MVP 的产品目标、核心功能、非目标范围、用户流程、验收标准与后续路线图。
+
+当前阶段的重点不是构建完整生产级交易系统，而是验证一个核心产品命题：
+
+> AI 金融 Agent 的决策过程是否可以被记录、哈希、锚定和验证？
+
+---
+
+## 2. 产品目标
+
+### 2.1 核心目标
+
+芙副官｜AgentProof Trading Guardian 的目标是为 AI 盯盘 / 交易辅助 Agent 提供可验证决策能力。
+
+它要让用户知道：
+
+* Agent 是否读取了记录中的市场数据；
+* Agent 是否遵守了用户输入的自然语言交易策略；
+* Agent 是否尊重仓位和风控限制；
+* Agent 是否使用了 forbidden inputs；
+* Agent 是否出现了幻觉或违规判断；
+* 当前决策 proof 是否已经锚定到 Injective。
+
+---
+
+### 2.2 当前 MVP 的验证目标
+
+当前 MVP 需要验证以下假设：
+
+| 假设                       | 说明                                             |
+| ------------------------ | ---------------------------------------------- |
+| 用户愿意体验 AI 盯盘 Agent       | 用户可以输入自己关注的股票代码和自然语言策略                         |
+| 用户关心 AI 决策是否可信           | 用户不仅看 BUY / SELL / HOLD，也看 verification result |
+| Verified Alert 比普通提醒更有价值 | 用户收到的是带 proof 的提醒，而不是普通交易信号                    |
+| 幻觉演示能帮助用户理解产品价值          | 通过 negative case 直观看到 AgentProof 如何拒绝错误决策      |
+| 开发者需要真实接入路径              | 开发者可以选择本地部署并接入真实 API 体验完整流程                    |
+
+---
+
+## 3. 产品定位
+
+当前版本的产品定位是：
+
+> 面向普通用户和开发者的 AI 金融 Agent 决策验证 Demo。
+
+它包含两类体验：
+
+### 3.1 普通用户体验
+
+普通用户无需部署代码，可以通过前端页面体验一个虚拟运算流程：
+
+```text
+输入股票代码
+↓
+输入自然语言交易策略
+↓
+输入当前仓位
+↓
+系统模拟读取行情和执行策略判断
+↓
+生成 BUY / SELL / HOLD 决策
+↓
+生成 proof package
+↓
+展示 verified alert
+```
+
+该流程中的 compute 为 mock，用于稳定演示。
+
+---
+
+### 3.2 开发者体验
+
+开发者可以选择本地部署项目，接入真实 API 和 Injective testnet，体验完整流程：
+
+```text
+Clone GitHub repo
+↓
+安装依赖
+↓
+配置 .env
+↓
+接入行情 API / Injective testnet
+↓
+运行 CLI demo
+↓
+生成 proof
+↓
+锚定 Injective
+↓
+本地 verifier 验证
+```
+
+---
+
+## 4. MVP 用户入口设计
+
+### 4.1 开始页面
+
+开始页面用于做用户分流。
+
+页面主标题：
+
+```text
+芙副官｜AgentProof Trading Guardian
+```
+
+副标题：
+
+```text
+AI 金融 Agent 的可验证决策层
+```
+
+页面核心说明：
+
+```text
+输入股票代码和自然语言策略，体验 AI 盯盘 Agent 如何生成决策、记录行为、生成 proof，并验证是否遵守规则。
+```
+
+---
+
+### 4.2 主按钮：普通用户体验
+
+按钮文案：
+
+```text
+普通用户，体验虚拟运算流程
+```
+
+点击后进入普通用户体验页面。
+
+该入口面向：
+
+* 非技术用户；
+* 投资者；
+* 黑客松评委；
+* 想快速理解产品价值的人。
+
+体验特点：
+
+* 不需要安装；
+* 不需要配置 API；
+* 不需要连接钱包；
+* compute 为 mock；
+* 能体验完整产品路径；
+* 能看到 verified alert 和 hallucination rejection。
+
+---
+
+### 4.3 小按钮：开发者体验
+
+按钮文案：
+
+```text
+我是开发者，部署到本地自行接入真实 API 体验全流程
+```
+
+点击后进入开发者说明页面。
+
+该入口面向：
+
+* 开发者；
+* 生态评委；
+* 想查看真实 Injective 集成的人；
+* 想本地运行 CLI / 前端 / verifier 的人。
+
+页面需要展示：
+
+* GitHub 地址；
+* 安装命令；
+* `.env` 配置提示；
+* 本地运行命令；
+* 真实 API 接入说明；
+* Injective testnet anchoring 说明；
+* 安全提醒：不要上传私钥，不要提交 `.env`。
+
+---
+
+## 5. 普通用户体验页面需求
+
+### 5.1 页面目标
+
+普通用户页面的目标是让用户亲自输入：
+
+* 自己关注的股票代码；
+* 自然语言交易策略；
+* 当前仓位信息；
+
+然后体验 AgentProof 的完整虚拟运算流程。
+
+---
+
+### 5.2 用户输入区
+
+用户需要填写以下字段：
+
+| 字段     | 类型         | 示例                                          |
+| ------ | ---------- | ------------------------------------------- |
+| 股票代码   | 输入框        | `600941`                                    |
+| 股票名称   | 输入框 / 自动填充 | `中国移动`                                      |
+| 自然语言策略 | 多行文本框      | `只有放量突破 112 才允许买入；跌破 106 才允许卖出；保留底仓，不允许清仓。` |
+| 当前持仓   | 数字输入       | `300`                                       |
+| 最大仓位   | 数字输入       | `1000`                                      |
+| 最低底仓   | 数字输入       | `300`                                       |
+| 风险等级   | 选择器        | `medium`                                    |
+
+---
+
+### 5.3 虚拟运算按钮
+
+按钮文案：
+
+```text
+开始验证 Agent 决策
+```
+
+点击后进入模拟流程。
+
+---
+
+### 5.4 虚拟运算流程展示
+
+页面需要展示一个可视化步骤流：
+
+```text
+读取用户策略
+↓
+模拟读取市场数据
+↓
+Agent 生成交易决策
+↓
+执行风控检查
+↓
+生成行为日志
+↓
+生成 proof hash
+↓
+模拟 / 展示 Injective anchor
+↓
+Verifier 验证
+↓
+生成 verified alert
+```
+
+每一步可以显示状态：
+
+```text
+Pending / Running / Passed / Rejected
+```
+
+---
+
+### 5.5 决策结果展示
+
+正常情况下，页面输出：
+
+| 字段           | 示例                                    |
+| ------------ | ------------------------------------- |
+| Asset        | `600941 / 中国移动`                       |
+| Decision     | `HOLD`                                |
+| Verification | `PASSED`                              |
+| Reason       | `当前价格未满足买入条件，且卖出会违反最低底仓限制，因此保持 HOLD。` |
+| Proof Status | `Anchored / Mock Anchored`            |
+| Alert Type   | `Verified Alert`                      |
+
+---
+
+### 5.6 用户提醒展示
+
+普通用户页面需要展示用户最终收到的提醒。
+
+提醒不是页面加载自动弹出，而是在结果区提供按钮：
+
+```text
+查看用户收到的 verified alert
+```
+
+点击后弹出可关闭弹窗。
+
+弹窗内容：
+
+```text
+Verified Trading Alert
+
+芙副官已生成一条经过验证的盯盘提醒。
+
+股票：600941 / 中国移动
+决策：HOLD
+验证结果：PASSED
+Proof：已锚定到 Injective testnet / 已完成模拟锚定
+
+这不是普通交易提醒，而是一条带有 proof 的 verified alert。
+```
+
+用户可以点击：
+
+```text
+关闭并继续查看验证详情
+```
+
+---
+
+## 6. 幻觉演示页面需求
+
+### 6.1 入口位置
+
+普通用户页面左上角增加按钮：
+
+```text
+幻觉演示
+```
+
+点击后跳转到独立页面：
+
+```text
+/hallucination-demo
+```
+
+---
+
+### 6.2 页面目标
+
+幻觉演示页面用于直观展示：
+
+> 当 AI Agent 幻觉市场数据或违反用户策略时，AgentProof 如何识别并拒绝该决策。
+
+---
+
+### 6.3 幻觉演示流程
+
+页面展示以下对比：
+
+#### 真实记录数据
+
+```text
+股票：600941 / 中国移动
+记录最高价：108.90
+用户策略：只有放量突破 112.00 才允许 BUY
+```
+
+#### Agent 幻觉输出
+
+```text
+Agent 声称：价格已突破 112.00，建议 BUY。
+```
+
+#### Verifier 检查
+
+```text
+记录中的最高价未达到 112.00
+Agent 声称的突破信号不存在
+BUY 决策不符合用户策略
+```
+
+#### 最终结果
+
+```text
+Verification: REJECTED
+Reason: hallucinated market data detected
+```
+
+---
+
+### 6.4 页面价值
+
+幻觉演示页面用于强化产品核心价值：
+
+* AgentProof 不依赖 AI 自己声称诚实；
+* AgentProof 会用记录中的市场数据、用户策略、行为日志和 hash 重新验证；
+* 当输出和记录数据不一致时，系统会拒绝该决策；
+* 这体现 AI 金融 Agent 的安全边界。
+
+---
+
+## 7. 开发者页面需求
+
+### 7.1 页面目标
+
+开发者页面用于说明如何本地部署项目，并接入真实 API / Injective testnet 体验完整流程。
+
+---
+
+### 7.2 页面内容
+
+开发者页面包括：
+
+#### 项目仓库
+
+```text
+GitHub Repo: 待填写
+```
+
+#### 安装依赖
+
+```bash
+npm install
+```
+
+#### 运行普通 demo
+
+```bash
+npm run demo:trading
+```
+
+#### 运行 verifier
+
+```bash
+npm run verify:trading
+```
+
+#### 运行幻觉检测 demo
+
+```bash
+npm run demo:hallucination
+```
+
+#### 注册 Agent 身份
+
+```bash
+npm run register:agent
+```
+
+#### 真实 Injective testnet anchoring
+
+```bash
+USE_REAL_INJECTIVE=true npm run anchor:injective
+```
+
+---
+
+### 7.3 环境变量说明
+
+开发者页面需要提示：
+
+```text
+请在本地创建 .env，不要提交私钥或助记词。
+```
+
+`.env` 示例字段：
+
+```text
+USE_REAL_INJECTIVE=true
+INJECTIVE_NETWORK=testnet
+INJECTIVE_PRIVATE_KEY=
+INJECTIVE_ADDRESS=
+INJECTIVE_MEMO_PREFIX=AgentProof
+```
+
+---
+
+## 8. MVP 功能范围
+
+### 8.1 Must Have
+
+当前 MVP 必须包含：
+
+* 开始页面；
+* 普通用户虚拟运算入口；
+* 开发者本地部署入口；
+* 用户输入股票代码；
+* 用户输入自然语言策略；
+* 用户输入仓位信息；
+* mock compute 流程；
+* BUY / SELL / HOLD 决策展示；
+* behavior log 展示；
+* proof package 展示；
+* verifier 检查结果展示；
+* verified alert 弹窗；
+* 幻觉演示页面；
+* hallucination rejection 过程展示；
+* Agent identity 展示；
+* Injective anchor 展示；
+* 开发者安装与 API 接入说明。
+
+---
+
+### 8.2 Should Have
+
+时间允许时应包含：
+
+* 步骤式运行动画；
+* copy proof hash / tx hash 按钮；
+* 多 Agent roadmap 展示；
+* 正常案例与幻觉案例对比；
+* 输入策略的示例模板；
+* 股票代码自动填充股票名称；
+* 用户可以重新开始体验。
+
+---
+
+### 8.3 Could Have
+
+后续可以考虑：
+
+* 接入真实行情 API；
+* 接入真实钱包；
+* 允许用户保存策略；
+* 生成可下载 proof report；
+* 支持多资产；
+* 支持更多规则模板；
+* 支持移动端优化；
+* 支持英文版本。
+
+---
+
+### 8.4 Won't Have in MVP
+
+当前 MVP 明确不做：
+
+* 自动下单；
+* 真实资金托管；
+* 收益预测；
+* 投资建议推荐系统；
+* 复杂回测；
+* 高频交易；
+* 完整生产级风控引擎；
+* 完整官方 Agent Registry 集成；
+* 生产级多 Agent 协作系统；
+* 用户账号系统；
+* 真实推送微信 / Telegram / 邮件。
+
+---
+
+## 9. 核心页面清单
+
+### 9.1 开始页面
+
+路径建议：
+
+```text
+/
+```
+
+作用：
+
+* 项目介绍；
+* 用户分流；
+* 普通用户入口；
+* 开发者入口。
+
+---
+
+### 9.2 普通用户体验页面
+
+路径建议：
+
+```text
+/user-demo
+```
+
+作用：
+
+* 用户输入股票和策略；
+* 体验虚拟计算流程；
+* 查看 verified alert；
+* 查看 proof 与 verifier 结果。
+
+---
+
+### 9.3 幻觉演示页面
+
+路径建议：
+
+```text
+/hallucination-demo
+```
+
+作用：
+
+* 展示 Agent 幻觉；
+* 展示 verifier 拒绝；
+* 说明为什么需要 AgentProof。
+
+---
+
+### 9.4 开发者页面
+
+路径建议：
+
+```text
+/developer
+```
+
+作用：
+
+* 展示本地部署说明；
+* 展示真实 API / Injective 接入说明；
+* 引导开发者 clone repo 自行运行。
+
+---
+
+## 10. 用户流程
+
+### 10.1 普通用户流程
+
+```text
+进入开始页面
+        ↓
+点击“普通用户，体验虚拟运算流程”
+        ↓
+输入股票代码
+        ↓
+输入自然语言策略
+        ↓
+输入仓位信息
+        ↓
+点击“开始验证 Agent 决策”
+        ↓
+查看虚拟运算过程
+        ↓
+查看 Agent 决策
+        ↓
+查看 proof package
+        ↓
+查看 verifier 结果
+        ↓
+点击查看 verified alert
+```
+
+---
+
+### 10.2 幻觉演示流程
+
+```text
+进入普通用户页面
+        ↓
+点击左上角“幻觉演示”
+        ↓
+查看真实市场数据
+        ↓
+查看 Agent 幻觉输出
+        ↓
+查看 verifier 检查过程
+        ↓
+看到 Verification: REJECTED
+        ↓
+理解 AgentProof 如何拒绝错误决策
+```
+
+---
+
+### 10.3 开发者流程
+
+```text
+进入开始页面
+        ↓
+点击“我是开发者”
+        ↓
+查看本地部署说明
+        ↓
+clone repo
+        ↓
+安装依赖
+        ↓
+配置 .env
+        ↓
+运行 CLI demo
+        ↓
+接入真实 API / Injective testnet
+```
+
+---
+
+## 11. 验收标准
+
+### 11.1 普通用户入口验收标准
+
+* 开始页有明显主按钮；
+* 主按钮文案为“普通用户，体验虚拟运算流程”；
+* 点击后进入用户 demo 页面；
+* 用户可以输入股票代码、策略和仓位；
+* mock compute 能生成完整流程；
+* 页面能展示决策结果、proof 和 verifier 结果；
+* verified alert 可手动打开并关闭。
+
+---
+
+### 11.2 开发者入口验收标准
+
+* 开始页有开发者入口；
+* 按钮文案为“我是开发者，部署到本地自行接入真实 API 体验全流程”；
+* 点击后进入开发者页面；
+* 页面提供安装、运行、环境变量和 Injective 接入说明；
+* 明确提示不要提交 private key / `.env`。
+
+---
+
+### 11.3 幻觉演示验收标准
+
+* 普通用户页面左上角有“幻觉演示”按钮；
+* 点击后进入独立幻觉演示页面；
+* 页面展示 Agent 幻觉输出；
+* 页面展示记录中的真实市场数据；
+* 页面展示 verifier 拒绝过程；
+* 最终结果为 `Verification: REJECTED`；
+* 用户能理解“为什么 AI 金融 Agent 需要验证层”。
+
+---
+
+### 11.4 技术验收标准
+
+* 原有 CLI demo 不被破坏；
+* `npm run demo:trading` 可运行；
+* `npm run verify:trading` 可运行；
+* `npm run demo:hallucination` 可运行；
+* 前端页面可正常 build；
+* mock compute 不依赖真实行情 API；
+* 真实 API / Injective testnet 仍保留开发者路径；
+* `.env` 不被提交。
+
+---
+
+## 12. 当前完成状态
+
+| 模块                           | 状态           | 备注                           |
+| ---------------------------- | ------------ | ---------------------------- |
+| TypeScript CLI Demo          | 已完成          | 支持正常决策流程                     |
+| Local Verifier               | 已完成          | 可重新计算 hash 验证                |
+| Injective testnet anchoring  | 已完成          | 支持 proof hash memo anchoring |
+| Agent Identity Anchor        | 已完成 MVP      | 使用 agent profile hash 锚定     |
+| Hallucination Detection Demo | 已完成 / 需前端增强  | CLI 已有，前端需增强交互               |
+| Frontend Dashboard           | 已完成 / 计划改造   | 当前为展示型 dashboard，下一步改为可交互体验  |
+| 普通用户输入流程                     | 待实现          | 输入股票、策略、仓位                   |
+| 开发者本地部署页面                    | 待实现          | 展示安装与接入说明                    |
+| Verified Alert 弹窗            | 已完成 / 需融入新流程 | 改为用户流程结果区触发                  |
+| 多 Agent 协作                   | Roadmap      | 当前只展示路线图                     |
+
+---
+
+## 13. 路线图
+
+### M0：Hackathon MVP
+
+目标：
+
+> 完成单 Agent 决策验证 demo，证明 AI 盯盘 Agent 的关键决策可以被记录、哈希、锚定和验证。
+
+包含：
+
+* Agent identity；
+* 用户策略；
+* 市场数据；
+* 行为日志；
+* proof hash；
+* Injective anchoring；
+* verifier；
+* hallucination rejection；
+* 前端演示页面。
+
+---
+
+### M1：可交互 Demo 改造
+
+目标：
+
+> 从静态 dashboard 改为普通用户可交互体验。
+
+包含：
+
+* 开始页面；
+* 用户 / 开发者入口分流；
+* 用户输入股票代码；
+* 用户输入自然语言策略；
+* 用户输入仓位；
+* mock compute；
+* 可视化运算流程；
+* verified alert 弹窗；
+* 幻觉演示独立页面。
+
+---
+
+### M2：真实 API 接入增强
+
+目标：
+
+> 支持开发者接入真实行情 API 与真实 Injective testnet 流程。
+
+包含：
+
+* 真实行情 API 配置；
+* API fallback 策略；
+* 更完整的 `.env.example`；
+* 开发者运行文档；
+* proof report 下载；
+* 更清晰的 tx explorer 链接。
+
+---
+
+### M3：Agent Identity 增强
+
+目标：
+
+> 从 agent profile hash anchoring 进一步升级到更完整的 Agent Identity / Agent Registry 集成。
+
+包含：
+
+* 更完整 Agent Profile；
+* Agent capability metadata；
+* Agent versioning；
+* Agent identity history；
+* 官方 Agent Registry 集成探索。
+
+---
+
+### M4：多 Agent 金融工作流
+
+目标：
+
+> 将单 Agent 决策验证扩展为多 Agent 协作验证。
+
+可能包含：
+
+```text
+Market Data Agent
+Strategy Agent
+Risk Guardian Agent
+Portfolio Agent
+Execution Agent
+Audit Agent
+```
+
+每个 Agent 都可以：
+
+* 拥有身份；
+* 生成输出 hash；
+* 将 handoff 记录进 proof package；
+* 最终形成完整 multi-agent decision proof。
+
+---
+
+### M5：面向集成方的 Trust Layer
+
+目标：
+
+> 将 AgentProof 从 demo 扩展为可被钱包、交易平台、DeFi 协议或 AI trading bot 集成的验证层。
+
+可能包含：
+
+* SDK；
+* API；
+* proof explorer；
+* per-proof verification；
+* team / enterprise dashboard；
+* 多策略管理；
+* webhook / notification integration；
+* wallet integration。
+
+---
+
+## 14. 成功指标
+
+### 14.1 Demo 层指标
+
+* 用户是否能在 1 分钟内理解项目价值；
+* 用户是否能完成一次普通用户虚拟体验；
+* 用户是否能理解 verified alert 和普通提醒的区别；
+* 用户是否能理解 hallucination rejection 的价值；
+* 开发者是否能根据页面说明完成本地部署。
+
+---
+
+### 14.2 产品层指标
+
+* proof generation success rate；
+* verification success rate；
+* hallucination case detection rate；
+* anchored proof count；
+* agent profile count；
+* verified alert trigger count；
+* developer clone / install count；
+* 用户反馈中对“可信提醒”的认可度。
+
+---
+
+### 14.3 生态层指标
+
+* 是否能作为 Injective AI financial agent 的 verification layer；
+* 是否适合钱包 / bot / portfolio 工具集成；
+* 是否能扩展到多 Agent 金融工作流；
+* 是否能形成可复用的 proof standard。
+
+---
+
+## 15. 风险与限制
+
+| 风险                     | 说明                     | 当前处理方式                  |
+| ---------------------- | ---------------------- | ----------------------- |
+| 用户误解为投资建议              | 用户可能以为系统在推荐买卖          | 页面明确说明不证明收益             |
+| mock compute 被误解为真实全流程 | 普通用户体验中 compute 为 mock | 页面标明为虚拟运算流程             |
+| 真实 API 不稳定             | 行情接口可能失败               | 开发者路径支持 sample fallback |
+| 私钥安全风险                 | 开发者可能误提交 `.env`        | 文档和页面明确提示               |
+| 幻觉检测范围有限               | 无法识别所有类型幻觉             | 明确说明只验证与记录数据 / 策略不一致的输出 |
+| 多 Agent 仍是路线图          | 当前不是完整多 Agent 系统       | Roadmap 中诚实标注           |
+
+---
+
+## 16. 非目标说明
+
+当前版本不是：
+
+* 投资建议产品；
+* 自动交易工具；
+* 收益预测系统；
+* 真实资金托管工具；
+* 合规金融服务；
+* 完整多 Agent 操作系统。
+
+当前版本是：
+
+> 一个用于验证 AI 金融 Agent 决策过程的 Hackathon MVP。
+
+---
+
+## 17. 总结
+
+当前 MVP 的核心产品价值是：
+
+> 让普通用户理解：AI 盯盘 Agent 不应只给出一个建议，还应该给出可验证的决策过程。
+
+通过普通用户虚拟运算入口，用户可以低门槛体验完整流程；通过开发者入口，技术用户可以部署到本地并接入真实 API；通过幻觉演示页面，用户可以直观看到 AgentProof 如何拒绝错误或幻觉决策。
+
+这让芙副官｜AgentProof Trading Guardian 从一个单纯的 AI 盯盘 demo，升级为一个面向 AI 金融 Agent 的可验证信任层。
