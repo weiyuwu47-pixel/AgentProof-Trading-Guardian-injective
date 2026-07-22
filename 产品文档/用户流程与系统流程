@@ -1,0 +1,855 @@
+# 用户流程与系统流程
+
+> 文档状态：Draft
+> 文档类型：User Flow + System Flow
+> 项目名称：芙副官｜AgentProof Trading Guardian
+> 项目阶段：Hackathon MVP
+> 关联文档：`01-product-brief.md`、`02-user-problem-and-persona.md`、`03-prd-mvp-scope-and-roadmap.md`
+
+---
+
+## 1. 文档目的
+
+本文档用于说明芙副官｜AgentProof Trading Guardian 的核心用户流程、系统处理流程、验证流程和页面信息架构。
+
+当前阶段的产品目标是让用户理解：
+
+> AI 金融 Agent 不应该只给出交易建议，还应该让决策过程可记录、可哈希、可锚定、可验证。
+
+因此，本项目的流程设计重点不是“让用户快速下单”，而是“让用户看懂 AI Agent 的决策依据和验证过程”。
+
+---
+
+## 2. 产品整体流程概览
+
+当前 MVP 包含三条主要路径：
+
+```text
+开始页面
+├── 普通用户路径：体验虚拟运算流程
+├── 开发者路径：本地部署并接入真实 API
+└── 幻觉演示路径：查看 Agent 幻觉如何被拒绝
+```
+
+三条路径分别服务不同目标：
+
+| 路径     | 目标用户         | 主要目的                           |
+| ------ | ------------ | ------------------------------ |
+| 普通用户路径 | 投资者、评委、非技术用户 | 快速理解 verified alert 和 proof 价值 |
+| 开发者路径  | 开发者、生态评委、集成方 | 理解如何本地部署并接入真实 API / Injective  |
+| 幻觉演示路径 | 所有用户         | 直观看到 AgentProof 如何拒绝幻觉决策       |
+
+---
+
+## 3. 页面信息架构
+
+### 3.1 页面清单
+
+| 页面       | 建议路径                  | 页面目的                           |
+| -------- | --------------------- | ------------------------------ |
+| 开始页面     | `/`                   | 介绍项目并进行用户分流                    |
+| 普通用户体验页面 | `/user-demo`          | 输入股票、策略和仓位，体验虚拟验证流程            |
+| 幻觉演示页面   | `/hallucination-demo` | 演示 Agent 幻觉决策被 verifier 拒绝     |
+| 开发者页面    | `/developer`          | 提供本地部署、真实 API 和 Injective 接入说明 |
+
+---
+
+### 3.2 页面关系
+
+```text
+/
+├── 点击「普通用户，体验虚拟运算流程」
+│       ↓
+│   /user-demo
+│       ├── 输入股票代码 / 策略 / 仓位
+│       ├── 开始验证 Agent 决策
+│       ├── 查看 proof package
+│       ├── 查看 verified alert
+│       └── 点击「幻觉演示」
+│               ↓
+│           /hallucination-demo
+│
+└── 点击「我是开发者，部署到本地自行接入真实 API 体验全流程」
+        ↓
+    /developer
+```
+
+---
+
+## 4. 开始页面流程
+
+### 4.1 页面目标
+
+开始页面的核心任务是：
+
+* 让用户快速理解项目是什么；
+* 明确区分普通用户和开发者；
+* 降低普通用户体验门槛；
+* 给开发者保留真实接入路径。
+
+---
+
+### 4.2 页面结构
+
+```text
+项目名称：芙副官｜AgentProof Trading Guardian
+副标题：AI 金融 Agent 的可验证决策层
+
+一句话说明：
+输入股票代码和自然语言策略，体验 AI 盯盘 Agent 如何生成决策、记录行为、生成 proof，并验证是否遵守规则。
+
+主按钮：
+普通用户，体验虚拟运算流程
+
+次按钮：
+我是开发者，部署到本地自行接入真实 API 体验全流程
+```
+
+---
+
+### 4.3 开始页面用户流程
+
+```text
+用户进入开始页面
+        ↓
+阅读项目一句话介绍
+        ↓
+判断自己的身份
+        ↓
+普通用户点击主按钮
+        ↓
+进入普通用户体验页面
+```
+
+或：
+
+```text
+用户进入开始页面
+        ↓
+阅读项目一句话介绍
+        ↓
+判断自己的身份
+        ↓
+开发者点击次按钮
+        ↓
+进入开发者说明页面
+```
+
+---
+
+## 5. 普通用户体验流程
+
+### 5.1 页面目标
+
+普通用户页面用于让非技术用户完成一次完整的虚拟体验。
+
+用户不需要理解代码、不需要配置 API、不需要连接钱包，也可以看到：
+
+* Agent 如何读取策略；
+* Agent 如何模拟读取行情；
+* Agent 如何生成决策；
+* Agent 如何生成 proof；
+* verifier 如何检查结果；
+* 用户最终收到的 verified alert 是什么。
+
+---
+
+### 5.2 普通用户输入流程
+
+```text
+进入普通用户体验页面
+        ↓
+输入股票代码
+        ↓
+输入股票名称，或由系统自动填充
+        ↓
+输入自然语言交易策略
+        ↓
+输入当前仓位
+        ↓
+输入最大仓位
+        ↓
+输入最低底仓
+        ↓
+选择风险等级
+        ↓
+点击「开始验证 Agent 决策」
+```
+
+---
+
+### 5.3 用户输入字段
+
+| 字段       | 类型         | 是否必填 | 示例                                          |
+| -------- | ---------- | ---- | ------------------------------------------- |
+| 股票代码     | 输入框        | 是    | `600941`                                    |
+| 股票名称     | 输入框 / 自动填充 | 否    | `中国移动`                                      |
+| 自然语言交易策略 | 多行文本框      | 是    | `只有放量突破 112 才允许买入；跌破 106 才允许卖出；保留底仓，不允许清仓。` |
+| 当前持仓     | 数字输入       | 是    | `300`                                       |
+| 最大仓位     | 数字输入       | 是    | `1000`                                      |
+| 最低底仓     | 数字输入       | 是    | `300`                                       |
+| 风险等级     | 选择器        | 否    | `medium`                                    |
+
+---
+
+### 5.4 普通用户虚拟运算流程
+
+用户点击「开始验证 Agent 决策」后，系统展示步骤式计算过程：
+
+```text
+读取用户策略
+        ↓
+模拟读取市场数据
+        ↓
+Agent 生成交易决策
+        ↓
+执行策略检查
+        ↓
+执行风控检查
+        ↓
+记录行为日志
+        ↓
+生成 proof package
+        ↓
+生成 proof hash
+        ↓
+模拟 / 展示 Injective anchor
+        ↓
+Verifier 重新计算并验证
+        ↓
+生成 verified alert
+```
+
+---
+
+### 5.5 运算步骤状态
+
+每个步骤建议显示状态：
+
+| 状态       | 含义     |
+| -------- | ------ |
+| Pending  | 尚未开始   |
+| Running  | 正在执行   |
+| Passed   | 已完成并通过 |
+| Rejected | 被验证器拒绝 |
+
+---
+
+### 5.6 普通用户结果页展示
+
+运算结束后，页面需要展示：
+
+```text
+Decision: HOLD
+Verification: PASSED
+Proof Status: Anchored / Mock Anchored
+Alert Type: Verified Alert
+```
+
+同时展示以下模块：
+
+* Agent Identity；
+* User Strategy；
+* Market Snapshot；
+* Trading Decision；
+* Behavior Log；
+* Proof Package；
+* Verification Checklist；
+* Injective Anchor；
+* Verified Alert。
+
+---
+
+## 6. Verified Alert 流程
+
+### 6.1 设计目标
+
+Verified Alert 用于让用户理解：
+
+> 用户收到的不只是普通提醒，而是已经通过验证的 AI Agent 决策结果。
+
+---
+
+### 6.2 触发方式
+
+Verified Alert 不在页面加载时自动弹出，而是在结果区域提供按钮：
+
+```text
+查看用户收到的 verified alert
+```
+
+用户点击后再弹出提醒。
+
+---
+
+### 6.3 弹窗内容
+
+```text
+Verified Trading Alert
+
+芙副官已生成一条经过验证的盯盘提醒。
+
+股票：600941 / 中国移动
+决策：HOLD
+验证结果：PASSED
+Proof：已锚定到 Injective testnet / 已完成模拟锚定
+
+这不是普通交易提醒，而是一条带有 proof 的 verified alert。
+```
+
+---
+
+### 6.4 关闭流程
+
+```text
+用户点击「查看用户收到的 verified alert」
+        ↓
+弹出 Verified Alert
+        ↓
+用户阅读提醒
+        ↓
+点击「关闭并继续查看验证详情」
+        ↓
+回到结果页面
+```
+
+---
+
+## 7. 幻觉演示流程
+
+### 7.1 页面入口
+
+普通用户体验页面左上角提供入口：
+
+```text
+幻觉演示
+```
+
+点击后进入独立页面：
+
+```text
+/hallucination-demo
+```
+
+---
+
+### 7.2 页面目标
+
+幻觉演示页面用于展示：
+
+> 当 AI Agent 编造行情或违反用户策略时，AgentProof 如何识别并拒绝该决策。
+
+---
+
+### 7.3 幻觉演示用户流程
+
+```text
+用户点击「幻觉演示」
+        ↓
+进入幻觉演示页面
+        ↓
+查看记录中的真实市场数据
+        ↓
+查看用户策略
+        ↓
+查看 Agent 幻觉输出
+        ↓
+查看 verifier 检查过程
+        ↓
+看到 Verification: REJECTED
+        ↓
+理解 AgentProof 的安全价值
+```
+
+---
+
+### 7.4 幻觉演示系统逻辑
+
+```text
+Recorded Market Snapshot
+        ↓
+User Strategy
+        ↓
+Hallucinated Agent Output
+        ↓
+Verifier Compare
+        ↓
+Mismatch Detected
+        ↓
+Decision Rejected
+```
+
+---
+
+### 7.5 幻觉演示示例
+
+#### 记录中的市场数据
+
+```text
+股票：600941 / 中国移动
+记录最高价：108.90
+```
+
+#### 用户策略
+
+```text
+只有放量突破 112.00 才允许 BUY
+```
+
+#### Agent 幻觉输出
+
+```text
+价格已突破 112.00，建议 BUY。
+```
+
+#### Verifier 检查结果
+
+```text
+记录最高价未达到 112.00
+Agent 声称的突破不存在
+BUY 决策违反用户策略
+```
+
+#### 最终结果
+
+```text
+Verification: REJECTED
+Reason: hallucinated market data detected
+```
+
+---
+
+## 8. 开发者流程
+
+### 8.1 页面目标
+
+开发者页面用于说明：
+
+* 项目如何本地部署；
+* 如何运行 CLI demo；
+* 如何运行 verifier；
+* 如何接入真实行情 API；
+* 如何使用 Injective testnet anchoring；
+* 如何避免私钥泄露。
+
+---
+
+### 8.2 开发者用户流程
+
+```text
+用户进入开始页面
+        ↓
+点击「我是开发者，部署到本地自行接入真实 API 体验全流程」
+        ↓
+进入开发者页面
+        ↓
+查看 GitHub Repo
+        ↓
+clone repo
+        ↓
+npm install
+        ↓
+配置 .env
+        ↓
+运行 demo
+        ↓
+运行 verifier
+        ↓
+运行 hallucination demo
+        ↓
+开启真实 Injective testnet anchoring
+```
+
+---
+
+### 8.3 开发者页面内容结构
+
+```text
+项目仓库
+↓
+环境要求
+↓
+安装依赖
+↓
+运行 demo
+↓
+运行 verifier
+↓
+运行 hallucination demo
+↓
+注册 Agent 身份
+↓
+接入真实 Injective testnet
+↓
+安全提醒
+```
+
+---
+
+## 9. 系统流程总览
+
+### 9.1 正常决策系统流程
+
+```text
+User Input
+  ├── Stock Code
+  ├── Natural Language Strategy
+  └── Position Settings
+        ↓
+Strategy Parser / Strategy Loader
+        ↓
+Market Data Provider
+        ↓
+Trading Guardian Agent
+        ↓
+Policy Evaluator
+        ↓
+Risk Checker
+        ↓
+Trading Decision
+        ↓
+Behavior Logger
+        ↓
+Proof Metadata Builder
+        ↓
+Stable JSON Hashing
+        ↓
+Proof Hash
+        ↓
+Injective Anchor / Mock Anchor
+        ↓
+Verifier
+        ↓
+Verified Alert
+```
+
+---
+
+### 9.2 Proof 生成流程
+
+```text
+Agent Profile
+        ↓
+agentProfileHash
+
+User Strategy
+        ↓
+strategyHash
+
+Market Snapshot
+        ↓
+marketDataHash
+
+Behavior Log
+        ↓
+behaviorLogHash
+
+Trading Decision Output
+        ↓
+outputHash
+
+agentProfileHash
++ strategyHash
++ marketDataHash
++ behaviorLogHash
++ outputHash
+        ↓
+Final Proof Hash
+```
+
+---
+
+### 9.3 Verifier 验证流程
+
+```text
+读取 proof metadata
+        ↓
+重新计算 agentProfileHash
+        ↓
+重新计算 strategyHash
+        ↓
+重新计算 marketDataHash
+        ↓
+重新计算 behaviorLogHash
+        ↓
+重新计算 outputHash
+        ↓
+重新计算 final proofHash
+        ↓
+对比记录中的 proofHash
+        ↓
+检查 forbidden inputs
+        ↓
+检查策略和风控结果
+        ↓
+检查 Injective anchor
+        ↓
+输出 PASSED / REJECTED
+```
+
+---
+
+### 9.4 Injective Anchor 流程
+
+```text
+生成 proof hash
+        ↓
+构造 memo
+        ↓
+写入 Injective testnet transaction memo
+        ↓
+获得 tx hash
+        ↓
+前端展示 tx hash / explorer link
+        ↓
+verifier 检查 proof 与链上锚点是否一致
+```
+
+---
+
+## 10. 正常案例流程
+
+### 10.1 输入
+
+```text
+股票代码：600941
+股票名称：中国移动
+策略：只有放量突破 112 才允许买入；跌破 106 才允许卖出；保留底仓，不允许清仓。
+当前持仓：300
+最大仓位：1000
+最低底仓：300
+```
+
+---
+
+### 10.2 系统判断
+
+```text
+当前市场数据未满足 BUY 条件。
+如果执行 SELL，可能违反最低底仓限制。
+因此 Agent 给出 HOLD。
+```
+
+---
+
+### 10.3 输出
+
+```text
+Decision: HOLD
+Verification: PASSED
+Alert: Verified Trading Alert
+```
+
+---
+
+## 11. 幻觉案例流程
+
+### 11.1 输入
+
+```text
+股票代码：600941
+用户策略：只有放量突破 112 才允许 BUY
+记录最高价：108.90
+```
+
+---
+
+### 11.2 Agent 幻觉输出
+
+```text
+Agent 声称价格已突破 112，建议 BUY。
+```
+
+---
+
+### 11.3 Verifier 判断
+
+```text
+记录中的最高价没有达到 112。
+Agent 声称与记录数据不一致。
+BUY 决策不符合用户策略。
+```
+
+---
+
+### 11.4 输出
+
+```text
+Verification: REJECTED
+Reason: hallucinated market data detected
+```
+
+---
+
+## 12. 异常流程与边界情况
+
+### 12.1 用户未输入股票代码
+
+处理方式：
+
+```text
+提示用户：请输入股票代码。
+```
+
+---
+
+### 12.2 用户未输入策略
+
+处理方式：
+
+```text
+提示用户：请输入自然语言交易策略。
+```
+
+---
+
+### 12.3 仓位输入不合理
+
+例如：
+
+```text
+最低底仓 > 最大仓位
+当前持仓 > 最大仓位
+```
+
+处理方式：
+
+```text
+提示用户检查仓位设置。
+```
+
+---
+
+### 12.4 mock compute 无法生成结果
+
+处理方式：
+
+```text
+展示 fallback 结果，并提示当前为虚拟运算流程。
+```
+
+---
+
+### 12.5 真实 API 失败
+
+处理方式：
+
+```text
+开发者路径下使用 sample fallback，避免 demo 中断。
+```
+
+---
+
+### 12.6 Injective anchor 失败
+
+处理方式：
+
+```text
+保留本地 proof 结果；
+提示 anchor failed；
+允许开发者检查 .env、gas、testnet 状态。
+```
+
+---
+
+## 13. 信息展示优先级
+
+### 13.1 普通用户优先看到
+
+普通用户不应一开始被大量 hash 和技术细节淹没。
+
+展示优先级建议：
+
+```text
+1. 决策结果：BUY / SELL / HOLD
+2. 验证结果：PASSED / REJECTED
+3. 为什么做出这个判断
+4. 是否违反策略 / 风控
+5. verified alert
+6. proof package
+7. Injective tx hash
+```
+
+---
+
+### 13.2 开发者优先看到
+
+开发者需要更完整的技术链路。
+
+展示优先级建议：
+
+```text
+1. 本地部署方式
+2. CLI 命令
+3. .env 配置
+4. proof metadata
+5. hash 生成逻辑
+6. Injective memo anchoring
+7. verifier 逻辑
+```
+
+---
+
+## 14. 流程设计原则
+
+### 14.1 先让用户体验，再解释技术
+
+普通用户不需要先理解 proof hash，应该先体验：
+
+```text
+输入策略 → 得到 verified alert → 再查看 proof
+```
+
+---
+
+### 14.2 正常案例和幻觉案例都要展示
+
+正常案例说明系统可以验证合规决策。
+
+幻觉案例说明系统可以拒绝错误决策。
+
+二者结合，用户才能理解 AgentProof 的价值。
+
+---
+
+### 14.3 明确区分 mock 和真实流程
+
+普通用户页面可以使用 mock compute，但必须明确说明：
+
+```text
+当前为虚拟运算体验，用于演示验证流程。
+```
+
+开发者页面则说明：
+
+```text
+开发者可以本地部署并接入真实 API / Injective testnet。
+```
+
+---
+
+### 14.4 不把产品包装成投资建议
+
+页面和文档应避免表达：
+
+```text
+系统推荐你买入 / 卖出
+```
+
+更适合表达：
+
+```text
+系统验证 Agent 是否按照你的策略生成了当前决策。
+```
+
+---
+
+## 15. 总结
+
+芙副官｜AgentProof Trading Guardian 的流程设计核心是：
+
+> 让用户从“AI 给了我一个建议”走向“我可以验证这个建议是如何产生的”。
+
+普通用户路径负责降低理解门槛，开发者路径负责证明技术可接入性，幻觉演示路径负责强化产品差异化。
+
+通过这三条路径，项目可以同时体现产品体验、技术可信度和黑客松 demo 的完整性。
