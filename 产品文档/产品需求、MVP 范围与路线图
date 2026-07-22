@@ -10,11 +10,7 @@
 
 ## 1. 文档目的
 
-本文档用于明确芙副官｜AgentProof Trading Guardian 当前 Hackathon MVP 的产品目标、核心功能、非目标范围、用户流程、验收标准与后续路线图。
-
-当前阶段的重点不是构建完整生产级交易系统，而是验证一个核心产品命题：
-
-> AI 金融 Agent 的决策过程是否可以被记录、哈希、锚定和验证？
+本文档用于明确芙副官当前 Hackathon MVP 的产品目标、核心功能、非目标范围、用户流程、验收标准与后续路线图。
 
 ---
 
@@ -22,7 +18,7 @@
 
 ### 2.1 核心目标
 
-芙副官｜AgentProof Trading Guardian 的目标是为 AI 盯盘 / 交易辅助 Agent 提供可验证决策能力。
+芙副官的目标是：为 AI 盯盘 / 交易辅助 Agent 提供可验证决策能力。
 
 它要让用户知道：
 
@@ -114,7 +110,7 @@ Clone GitHub repo
 页面主标题：
 
 ```text
-芙副官｜AgentProof Trading Guardian
+芙副官
 ```
 
 副标题：
@@ -144,7 +140,6 @@ AI 金融 Agent 的可验证决策层
 该入口面向：
 
 * 非技术用户；
-* 投资者；
 * 黑客松评委；
 * 想快速理解产品价值的人。
 
@@ -173,7 +168,6 @@ AI 金融 Agent 的可验证决策层
 
 * 开发者；
 * 生态评委；
-* 想查看真实 Injective 集成的人；
 * 想本地运行 CLI / 前端 / verifier 的人。
 
 页面需要展示：
@@ -203,20 +197,18 @@ AI 金融 Agent 的可验证决策层
 ---
 
 ### 5.2 用户输入区
+用户需要填写以下信息：
 
-用户需要填写以下字段：
+| 字段 | 类型 | 是否必填 | 示例 |
+| --- | --- | --- | --- |
+| 股票市场 | 选择器 | 是 | `A股` / `港股` / `美股` |
+| 股票代码 | 输入框 | 是 | `600941` |
+| 股票名称 | 输入框 / 自动填充 | 否 | `中国移动` |
+| 自然语言策略 | 多行文本框 | 是 | `我目前持有 300 股，最多持有 1000 股。只有放量突破 112 才允许买入；跌破 106 才允许卖出；至少保留 300 股底仓，不允许清仓。` |
 
-| 字段     | 类型         | 示例                                          |
-| ------ | ---------- | ------------------------------------------- |
-| 股票代码   | 输入框        | `600941`                                    |
-| 股票名称   | 输入框 / 自动填充 | `中国移动`                                      |
-| 自然语言策略 | 多行文本框      | `只有放量突破 112 才允许买入；跌破 106 才允许卖出；保留底仓，不允许清仓。` |
-| 当前持仓   | 数字输入       | `300`                                       |
-| 最大仓位   | 数字输入       | `1000`                                      |
-| 最低底仓   | 数字输入       | `300`                                       |
-| 风险等级   | 选择器        | `medium`                                    |
+系统根据用户填写的股票市场和股票代码识别标的，并从自然语言策略中提取买入条件、卖出条件、持仓限制和风险约束。
 
----
+若股票名称未填写，系统可根据股票市场与股票代码自动补全；若无法识别，则提示用户确认代码或手动填写股票名称。
 
 ### 5.3 虚拟运算按钮
 
@@ -284,7 +276,7 @@ Pending / Running / Passed / Rejected
 提醒不是页面加载自动弹出，而是在结果区提供按钮：
 
 ```text
-查看用户收到的 verified alert
+查看用户收到的可验证提醒
 ```
 
 点击后弹出可关闭弹窗。
@@ -292,8 +284,6 @@ Pending / Running / Passed / Rejected
 弹窗内容：
 
 ```text
-Verified Trading Alert
-
 芙副官已生成一条经过验证的盯盘提醒。
 
 股票：600941 / 中国移动
@@ -301,7 +291,6 @@ Verified Trading Alert
 验证结果：PASSED
 Proof：已锚定到 Injective testnet / 已完成模拟锚定
 
-这不是普通交易提醒，而是一条带有 proof 的 verified alert。
 ```
 
 用户可以点击：
@@ -739,124 +728,102 @@ clone repo
 
 ---
 
-## 13. 路线图
+## 13. 当前范围与后续探索
 
-### M0：Hackathon MVP
+### 13.1 Hackathon MVP
 
 目标：
 
-> 完成单 Agent 决策验证 demo，证明 AI 盯盘 Agent 的关键决策可以被记录、哈希、锚定和验证。
+> 完成单 Agent 决策验证 Demo，验证 AI 盯盘 Agent 的关键决策是否可以被记录、哈希、锚定和复核。
 
-包含：
+已包含：
 
-* Agent identity；
-* 用户策略；
-* 市场数据；
-* 行为日志；
-* proof hash；
-* Injective anchoring；
-* verifier；
-* hallucination rejection；
-* 前端演示页面。
+* Agent Identity；
+* 用户策略输入；
+* 市场数据输入；
+* Agent 行为日志；
+* Proof Hash 生成；
+* Injective Anchoring；
+* 决策验证器；
+* Hallucination Rejection 演示；
+* 前端结果展示页面。
 
 ---
 
-### M1：可交互 Demo 改造
+### 13.2 当前 Demo 改造
 
 目标：
 
-> 从静态 dashboard 改为普通用户可交互体验。
+> 将原有静态 Dashboard 改造为普通用户可以直接操作和理解的交互式 Demo。
 
 包含：
 
 * 开始页面；
-* 用户 / 开发者入口分流；
-* 用户输入股票代码；
-* 用户输入自然语言策略；
-* 用户输入仓位；
-* mock compute；
-* 可视化运算流程；
-* verified alert 弹窗；
-* 幻觉演示独立页面。
+* 普通用户 / 开发者入口分流；
+* 股票市场、代码和名称输入；
+* 自然语言策略输入；
+* Mock Compute；
+* 可视化决策流程；
+* Verified Alert 结果展示；
+* 幻觉演示独立页面；
+* 开发者本地部署提示。
 
----
-
-### M2：真实 API 接入增强
-
-目标：
-
-> 支持开发者接入真实行情 API 与真实 Injective testnet 流程。
-
-包含：
-
-* 真实行情 API 配置；
-* API fallback 策略；
-* 更完整的 `.env.example`；
-* 开发者运行文档；
-* proof report 下载；
-* 更清晰的 tx explorer 链接。
-
----
-
-### M3：Agent Identity 增强
-
-目标：
-
-> 从 agent profile hash anchoring 进一步升级到更完整的 Agent Identity / Agent Registry 集成。
-
-包含：
-
-* 更完整 Agent Profile；
-* Agent capability metadata；
-* Agent versioning；
-* Agent identity history；
-* 官方 Agent Registry 集成探索。
-
----
-
-### M4：多 Agent 金融工作流
-
-目标：
-
-> 将单 Agent 决策验证扩展为多 Agent 协作验证。
-
-可能包含：
+本阶段重点不是实现真实自动交易，而是让用户完整体验：
 
 ```text
+输入策略
+→ Agent 解析
+→ 市场条件判断
+→ 风险规则检查
+→ 决策生成
+→ Proof 生成
+→ 链上锚定
+→ 用户验证
+13.3 后续是否继续开发
+
+AgentProof 当前定位为 Hackathon MVP 和产品概念验证项目。
+
+项目完成交互式 Demo 后，将根据以下反馈决定是否继续投入开发：
+
+黑客松评审反馈；
+Injective 生态团队反馈；
+开发者是否愿意尝试接入；
+用户是否能够理解并认可“可验证 Agent 决策”的价值；
+是否出现明确的钱包、交易平台、交易 Bot 或 DeFi 协议集成需求。
+
+在获得有效反馈之前，暂不预设大规模产品化路线，也不承诺 SDK、企业 Dashboard 或真实交易执行等重投入功能。
+
+13.4 Agent-to-Agent 探索方向
+
+虽然当前 MVP 只验证单 Agent 的决策过程，但项目长期关注的问题并不局限于单个交易 Agent。
+
+未来的金融 AI 工作流可能由多个 Agent 协作完成，例如：
+
 Market Data Agent
-Strategy Agent
-Risk Guardian Agent
-Portfolio Agent
-Execution Agent
-Audit Agent
-```
+→ Strategy Agent
+→ Risk Guardian Agent
+→ Portfolio Agent
+→ Execution Agent
+→ Audit Agent
 
-每个 Agent 都可以：
+在多 Agent 系统中，风险不仅来自最终结果是否正确，还来自 Agent 之间的协作过程是否可以被追踪和验证，例如：
 
-* 拥有身份；
-* 生成输出 hash；
-* 将 handoff 记录进 proof package；
-* 最终形成完整 multi-agent decision proof。
+哪个 Agent 提供了市场数据；
+哪个 Agent生成了交易建议；
+哪个 Agent 修改或否决了建议；
+Agent 之间传递了哪些上下文；
+每次 Handoff 是否被篡改；
+最终决策由哪些中间输出共同形成。
 
----
+AgentProof 对 Agent-to-Agent 场景的初步设想是：
 
-### M5：面向集成方的 Trust Layer
+每个 Agent 拥有可识别的身份和版本；
+每个关键输出生成独立 Hash；
+Agent 之间的 Handoff 被记录；
+多个中间 Proof 最终组成完整的 Decision Proof；
+用户或集成方能够复核整条决策链路，而不只是查看最终结果。
 
-目标：
-
-> 将 AgentProof 从 demo 扩展为可被钱包、交易平台、DeFi 协议或 AI trading bot 集成的验证层。
-
-可能包含：
-
-* SDK；
-* API；
-* proof explorer；
-* per-proof verification；
-* team / enterprise dashboard；
-* 多策略管理；
-* webhook / notification integration；
-* wallet integration。
-
+这部分目前属于产品方向探索，不属于本次 Hackathon MVP 的交付范围。
 ---
 
 ## 14. 成功指标
